@@ -12,7 +12,7 @@ import Application from '../lib/index.js';
 
 process.on('unhandledRejection', (error) => {
 	console.error(error.stack);
-	process.exit(1);
+	process.exit (1);
 });
 
 let app;
@@ -210,6 +210,22 @@ describe('Application', () => {
 
 			await request
 				.get('/some/nested/path')
+				.expect('Content-Type', 'text/plain; charset=utf-8')
+				.expect(200, 'Hello, World!');
+
+		});
+
+		it ('should respond with `Hello, World!` when there is a space in path.', async () => {
+
+			app.root(({ endpoint }) => {
+				endpoint.mount('helloWorld', ({ endpoint }) => {
+					endpoint.get(() => 'Hello, World!');
+				});
+			});
+
+			await request
+				.get('/hello world')
+				.expect('Content-Type', 'text/plain; charset=utf-8')
 				.expect(200, 'Hello, World!');
 
 		});

@@ -1,6 +1,6 @@
 {
   "name": "@trenskow/app",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "A small HTTP router.",
   "type": "module",
   "main": "index.js",
@@ -31,7 +31,6 @@
   },
   "dependencies": {
     "@trenskow/api-error": "^2.2.4",
-    "@trenskow/caseit": "^1.1.1",
-    "methods": "^1.1.2"
+    "@trenskow/caseit": "^1.1.1"
   }
 }

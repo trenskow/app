@@ -11,82 +11,85 @@ It is inspired by [express](https://npmjs.org/package/express) – but uses mode
 
 * [Usage](#usage)
 	+ [Example](#example)
-	  - [Code](#code)
-	  - [Result](#result)
+		- [Code](#code)
+		- [Result](#result)
 	+ [Designing your app](#designing-your-app)
-	  - [Routers](#routers)
-		* [`Router`](#router)
-		* [`Endpoint`](#endpoint)
-	  - [Asynchronous everywhere!](#asynchronous-everywhere)
-	  - [The `context` object](#the-context-object)
-		* [Example](#example-1)
-	  - [Casing](#casing)
-		* [HTTP headers](#http-headers)
-		* [Query parameters](#query-parameters)
-		* [Mount paths](#mount-paths)
-	  - [Endpoints, routers and handlers](#endpoints-routers-and-handlers)
-		* [Endpoints](#endpoints)
-		  + [When using endpoints](#when-using-endpoints)
-		* [Routers](#routers-1)
-		  + [When using routers](#when-using-routers)
-		* [Handlers](#handlers)
-		  + [When using handlers](#when-using-handlers)
-  * [API Reference](#api-reference)
+		- [Routers](#routers)
+			* [`Router`](#router)
+			* [`Endpoint`](#endpoint)
+		- [Asynchronous everywhere!](#asynchronous-everywhere)
+		- [The `context` object](#the-context-object)
+			* [Example](#example-1)
+		- [Casing](#casing)
+			* [HTTP headers](#http-headers)
+			* [Query parameters](#query-parameters)
+			* [Mount paths](#mount-paths)
+		- [Endpoints, routers and handlers](#endpoints-routers-and-handlers)
+			* [Endpoints](#endpoints)
+				+ [When using endpoints](#when-using-endpoints)
+			* [Routers](#routers-1)
+				+ [When using routers](#when-using-routers)
+			* [Handlers](#handlers)
+				+ [When using handlers](#when-using-handlers)
+* [API Reference](#api-reference)
 	+ [`Application`](#application)
-	  - [Constructor](#constructor)
-		* [Parameters](#parameters)
-	  - [Instance methods](#instance-methods)
-		* [`start`](#start)
-		  + [Parameters](#parameters-1)
-		* [`stop`](#stop)
-		  + [Parameters](#parameters-2)
-		* [`root`](#root)
-		  + [Parameters](#parameters-3)
-		* [`renderer`](#renderer)
-		  + [Parameters](#parameters-4)
-		  + [Default](#default)
-	  - [Properties](#properties)
-		* [`port`](#port)
-		* [`server`](#server)
+		- [Constructor](#constructor)
+			* [Parameters](#parameters)
+		- [Instance methods](#instance-methods)
+			* [`open`](#open)
+				+ [Parameters](#parameters-1)
+			* [`close`](#close)
+				+ [Parameters](#parameters-2)
+			* [`root`](#root)
+				+ [Parameters](#parameters-3)
+			* [`renderer`](#renderer)
+				+ [Parameters](#parameters-4)
+				+ [Default](#default)
+		- [Properties](#properties)
+			* [`port`](#port)
+			* [`server`](#server)
+			* [`state`](#state)
+				+ [Possible values](#possible-values)
 	+ [`Endpoint`](#endpoint-1)
-	  - [Constructor](#constructor-1)
-	  - [Instance methods](#instance-methods-1)
-		* [`get`, `post`, `put`, `delete`, etc..](#get-post-put-delete-etc)
-		  + [Parameters](#parameters-5)
-		  + [Example](#example-2)
-		* [`mount`](#mount)
-		  + [Parameters](#parameters-6)
-		  + [Example](#example-3)
-		* [`parameter`](#parameter)
-		  + [Parameters](#parameters-7)
-		  + [Example](#example-4)
-		* [`middleware`](#middleware)
-		  + [Parameters](#parameters-8)
-		  + [Example](#example-5)
+		- [Constructor](#constructor-1)
+		- [Instance methods](#instance-methods-1)
+			* [`get`, `post`, `put`, `delete`, etc..](#get-post-put-delete-etc)
+				+ [Parameters](#parameters-5)
+				+ [Example](#example-2)
+				+ [Catch all](#catch-all)
+			* [`mount`](#mount)
+				+ [Parameters](#parameters-6)
+				+ [Example](#example-3)
+			* [`parameter`](#parameter)
+				+ [Parameters](#parameters-7)
+				+ [Example](#example-4)
+			* [`middleware`](#middleware)
+				+ [Parameters](#parameters-8)
+				+ [Example](#example-5)
 	+ [`Router`](#router-1)
-	  - [Constructor](#constructor-2)
-	  - [Instance methods](#instance-methods-2)
-		* [`.use`](#use)
-		  + [Parameters](#parameters-9)
-		  + [Example](#example-6)
+		- [Constructor](#constructor-2)
+		- [Instance methods](#instance-methods-2)
+			* [`.use`](#use)
+				+ [Parameters](#parameters-9)
+				+ [Example](#example-6)
 	+ [`Request`](#request)
-	  - [Constructor](#constructor-3)
-	  - [Properties](#properties-1)
-		* [`headers`](#headers)
+		- [Constructor](#constructor-3)
+		- [Properties](#properties-1)
+			* [`headers`](#headers)
 	+ [`Response`](#response)
-	  - [Constructor](#constructor-4)
-	  - [Instance methods](#instance-methods-3)
-		* [`getHeader`](#getheader)
-		  + [Parameters](#parameters-10)
-		* [`setHeader`](#setheader)
-		  + [Parameters](#parameters-11)
-		* [`removeHeader`](#removeheader)
-		  + [Parameters](#parameters-12)
-		* [`hasHeader`](#hasheader)
-		  + [Parameters](#parameters-13)
-		* [`getHeaderNames`](#getheadernames)
-	  - [Properties](#properties-2)
-		* [`headers`](#headers-1)
+		- [Constructor](#constructor-4)
+		- [Instance methods](#instance-methods-3)
+			* [`getHeader`](#getheader)
+				+ [Parameters](#parameters-10)
+			* [`setHeader`](#setheader)
+				+ [Parameters](#parameters-11)
+			* [`removeHeader`](#removeheader)
+				+ [Parameters](#parameters-12)
+			* [`hasHeader`](#hasheader)
+				+ [Parameters](#parameters-13)
+			* [`getHeaderNames`](#getheadernames)
+		- [Properties](#properties-2)
+			* [`headers`](#headers-1)
 	+ [License](#license)
 
 ## Usage
@@ -348,19 +351,27 @@ The `Application` class takes and "options" object as it's parameter.
 
 #### Instance methods
 
-##### `start`
+##### `open`
 
-This method starts the server. The server will accept connections using the port provided in the constructor.
+This method opens (starts) the server. The server will accept connections using the port provided in the constructor.
+
+> Will throw an error if the [state](#state) of the application is anything other than `'closed'`.
 
 > Returns a `Promise` that resolves to the application.
 
 ###### Parameters
 
-The `start` method takes no parameters.
+| Name   | Description                                                                         |  Type  | Required |                      Default value                       |
+| ------ | ----------------------------------------------------------------------------------- | :----: | :------: | :------------------------------------------------------: |
+| `port` | If no port was provided in the [constructor](#constructor) it can be provided here. | Number |          | Value set in constructor or `0` (automatically assigned) |
 
-##### `stop`
+> Parameters can be passed both as `stop(port)` or `stop({ port })`.
 
-Stops the server. 
+##### `close`
+
+This method closes (stops) the server.
+
+> Will throw an error if the [state](#state) of the application is anything other than `'open'`.
 
 > Returns a `Promise` that resolves to the application.
 
@@ -378,9 +389,9 @@ This method sets the root endpoint of the server.
 
 The provided endpoint is the one that will handle all requests to `/`. It is where you set the "main entry" for your application.
 
-> Returns a `Promise` that resolves to the application.
-
 > If no root endpoint is provided the server will respond to all requests with `404 Not Found`.
+
+> Returns the application.
 
 ###### Parameters
 
@@ -396,7 +407,7 @@ This method is responsible to turn whatever the routes have returned and write i
 
 JSON encoding of values would be something to put in here.
 
-> Returns a `Promise` that resolves to the application.
+> Returns the application.
 
 ###### Parameters
 
@@ -416,7 +427,20 @@ Returns the port at which the server is currently listening.
 
 ##### `server`
 
-Returns the underlying `HTTP` instance.
+Returns the underlying `HTTP` server instance.
+
+##### `state`
+
+Returns a string that represents the current state of the application.
+
+###### Possible values
+
+| Value     | Description                                                   |
+| --------- | ------------------------------------------------------------- |
+| `closed`  | The server is not listening for incoming connections.         |
+| `closing` | The server is closing and waiting for clients to disconnect.  |
+| `open`    | The server is running and listening for incoming connections. |
+| `opening` | The server is currently in the process of opening.            |
 
 ### `Endpoint`
 

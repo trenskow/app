@@ -26,7 +26,7 @@ describe('Application', () => {
 			app = new Application();
 
 			const port = (await app
-				.start())
+				.open())
 				.port;
 
 			request = supertest(`http://localhost:${port}`);
@@ -231,7 +231,7 @@ describe('Application', () => {
 		});
 
 		after(async () => {
-			await app.stop({ awaitAllConnections: true });
+			await app.close({ awaitAllConnections: true });
 		});
 
 	});
@@ -250,7 +250,7 @@ describe('Application', () => {
 								.get(() => 'Hello!');
 						});
 				})
-				.start())
+				.open())
 				.port;
 
 			request = supertest(`http://localhost:${port}`);
@@ -283,7 +283,7 @@ describe('Application', () => {
 		});
 
 		after(async () => {
-			await app.stop({ awaitAllConnections: true });
+			await app.close({ awaitAllConnections: true });
 		});
 
 	});

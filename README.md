@@ -66,12 +66,18 @@ It is inspired by [express](https://npmjs.org/package/express) – but uses mode
 			* [`middleware`](#middleware)
 				+ [Parameters](#parameters-8)
 				+ [Example](#example-5)
+			* [`.mixin`](#mixin)
+				+ [Parameters](#parameters-9)
+				+ [Example](#example-6)
 	+ [`Router`](#router-1)
 		- [Constructor](#constructor-2)
 		- [Instance methods](#instance-methods-2)
 			* [`.use`](#use)
-				+ [Parameters](#parameters-9)
-				+ [Example](#example-6)
+				+ [Parameters](#parameters-10)
+				+ [Example](#example-7)
+			* [`.mixin`](#mixin-1)
+				+ [Parameters](#parameters-11)
+				+ [Example](#example-8)
 	+ [`Request`](#request)
 		- [Constructor](#constructor-3)
 		- [Properties](#properties-1)
@@ -80,13 +86,13 @@ It is inspired by [express](https://npmjs.org/package/express) – but uses mode
 		- [Constructor](#constructor-4)
 		- [Instance methods](#instance-methods-3)
 			* [`getHeader`](#getheader)
-				+ [Parameters](#parameters-10)
-			* [`setHeader`](#setheader)
-				+ [Parameters](#parameters-11)
-			* [`removeHeader`](#removeheader)
 				+ [Parameters](#parameters-12)
-			* [`hasHeader`](#hasheader)
+			* [`setHeader`](#setheader)
 				+ [Parameters](#parameters-13)
+			* [`removeHeader`](#removeheader)
+				+ [Parameters](#parameters-14)
+			* [`hasHeader`](#hasheader)
+				+ [Parameters](#parameters-15)
 			* [`getHeaderNames`](#getheadernames)
 		- [Properties](#properties-2)
 			* [`headers`](#headers-1)
@@ -635,6 +641,41 @@ export default = ({ router }) => {
 };
 ````
 
+##### `.mixin`
+
+This method mixes in another endpoint into this.
+
+> Returns the endpoint.
+
+###### Parameters
+
+| Name       | Description                            |                        Type                        |      Required      | Default value |
+| ---------- | -------------------------------------- | :------------------------------------------------: | :----------------: | :-----------: |
+| `endpoint` | The endpoint to be mixed in into this. | [`Endpoint`](#endpoint-2) ([see also](#endpoints)) | :white_check_mark: |               |
+
+###### Example
+
+Below is an example on how to use mixin.
+
+````javascript
+/* endpoint-1.js */
+
+export default ({ endpoint }) => {
+	endpoint
+		.get(() => 'Hello, world!')
+		.mixin(import('./endpoint-2.js'));
+};
+````
+
+````javascript
+/* endpoint-2.js */
+
+export default ({ endpoint }) => {
+	endpoint
+		.post(async () => 'Hello, world from POST!');
+};
+````
+
 ### `Router`
 
 #### Constructor
@@ -660,6 +701,42 @@ Typically used by middleware.
 ###### Example
 
 > See example [above](#example-6).
+
+##### `.mixin`
+
+This method mixes in another router into this.
+
+> Returns the router.
+
+###### Parameters
+
+| Name     | Description                          |                     Type                     |      Required      | Default value |
+| -------- | ------------------------------------ | :------------------------------------------: | :----------------: | :-----------: |
+| `router` | The router to be mixed in into this. | [Router](#router-2) ([see also](#routers-2)) | :white_check_mark: |               |
+
+###### Example
+
+Below is an example on how to use mixin.
+
+````javascript
+/* router-1.js */
+
+export default ({ router }) => {
+	router
+		.mixin(import('./router-2.js'));
+};
+````
+
+````javascript
+/* router-2.js */
+
+export default ({ router }) => {
+	router
+		.use(async () => {
+			/* Your handler here */
+		});
+};
+````
 
 ### `Request`
 
@@ -745,3 +822,4 @@ Returns an object that has the response headers as key/values, where the [keys h
 ### License
 
 See license in LICENSE
+

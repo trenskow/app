@@ -230,6 +230,46 @@ describe('Application', () => {
 
 		});
 
+		it ('should respond with `Hello, World!` from a mixin router.', async () => {
+
+			app.root(({ endpoint }) => {
+				endpoint
+					.use((context) => context.parts = [])
+					.middleware(({ router }) => {
+						router
+							.use(({ parts }) => parts.push('Hello'))
+							.mixin(({ router }) => {
+								router
+									.use(({ parts }) => parts.push('World!'));
+							});
+					})
+					.get(({ parts }) => parts.join(', '));
+			});
+
+			await request
+				.get('/')
+				.expect('Content-Type', 'text/plain; charset=utf-8')
+				.expect(200, 'Hello, World!');
+
+		});
+
+		it ('should respond with `Hello, World!` from a mixin endpoint.', async () => {
+
+			app.root(({ endpoint }) => {
+				endpoint
+					.mixin(({ endpoint }) => {
+						endpoint
+							.get(() => 'Hello, World!');
+					});
+			});
+
+			await request
+				.get('/')
+				.expect('Content-Type', 'text/plain; charset=utf-8')
+				.expect(200, 'Hello, World!');
+
+		});
+
 		after(async () => {
 			await app.close({ awaitAllConnections: true });
 		});

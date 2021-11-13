@@ -133,18 +133,18 @@ describe('Application', () => {
 			app.root(({ endpoint }) => {
 				endpoint
 					.parameter({
-						name: 'value',
+						name: 'target',
+						transform: ({ target }) => `Hello, ${target}!`,
 						endpoint: ({ endpoint }) => {
-							endpoint.get(({ parameters: { value }}) => value);
-						},
-						transform: (value) => `${value}-2`
+							endpoint.get(({ parameters: { target }}) => target);
+						}
 					});
 			});
 
 			await request
-				.get('/the-actual-value/')
+				.get('/World/')
 				.expect('Content-Type', 'text/plain; charset=utf-8')
-				.expect(200, 'the-actual-value-2');
+				.expect(200, 'Hello, World!');
 
 		});
 

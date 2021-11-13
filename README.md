@@ -221,18 +221,21 @@ Middleware can also use the context to provide data and services, which is then 
 
 When a request is incoming, the `context`object looks like this.
 
-| Name          | Description                                                                                                                                                                                                                                 |            Type             |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------: |
-| `application` | The application instance that has received the request.                                                                                                                                                                                     | [Application](#Application) |
-| `request`     | The request object from the HTTP server.                                                                                                                                                                                                    |     [Request](#Request)     |
-| `response`    | The response object from the HTTP server.                                                                                                                                                                                                   |    [Response](#Response)    |
-| `parameters`  | An empty object that will contain the parameters picked up when processing the parameters (if any) of the requested path.                                                                                                                   |           Object            |
-| `path`        | The original full path requested by the user.                                                                                                                                                                                               |           String            |
-| `query`       | An object holding the URL query parameters as an object ([keys has been converted to camel case](#query-parameters)).                                                                                                                       |           Object            |
-| `state`       | A string indicating the current state of the request – possible values are `'processing'`, `'rendering'`, `'completed'` or `'aborted'`.                                                                                                     |           String            |
-| `abort`       | A function that aborts the request. It takes the parameters `(error, brutally)`, where `error` is the error that needs to be handled by the [renderer](#renderer) – and `brutally` which indicates if the connection should also be closed. |        AsyncFunction        |
-| `render`      | A function that tells the application to stop processing the request and jump directly to the [renderer](#renderer).                                                                                                                        |          Function           |
-| `result`      | Whatever has been returned by the method handlers (should be written in the [`renderer`](#renderer)).                                                                                                                                       |             Any             |
+| Name             | Description                                                  |            Type             |
+| ---------------- | ------------------------------------------------------------ | :-------------------------: |
+| `application`    | The application instance that has received the request.      | [Application](#Application) |
+| `request`        | The request object from the HTTP server.                     |     [Request](#Request)     |
+| `response`       | The response object from the HTTP server.                    |    [Response](#Response)    |
+| `parameters`     | An empty object that will contain the parameters picked up when processing the parameters (if any) of the requested path. |           Object            |
+| `path`           | An object that has properties representing different paths.  |           Object            |
+| `path.full`      | An array of strings that joined represent the path components of the fully requested path. |       Array of String       |
+| `path.current`   | An array of strings that joined represents the path currently being processed. |       Array of String       |
+| `path.remaining` | An array of strings that joined represents the path that is above the currently processed path. |                             |
+| `query`          | An object holding the URL query parameters as an object ([keys has been converted to camel case](#query-parameters)). |           Object            |
+| `state`          | A string indicating the current state of the request – possible values are `'processing'`, `'rendering'`, `'completed'` or `'aborted'`. |           String            |
+| `abort`          | A function that aborts the request. It takes the parameters `(error, brutally)`, where `error` is the error that needs to be handled by the [renderer](#renderer) – and `brutally` which indicates if the connection should also be closed. |        AsyncFunction        |
+| `render`         | A function that tells the application to stop processing the request and jump directly to the [renderer](#renderer). |          Function           |
+| `result`         | Whatever has been returned by the method handlers (should be written in the [`renderer`](#renderer)). |             Any             |
 
 ##### Example
 
@@ -551,7 +554,7 @@ This method mounts another endpoint, but uses the path as a dynamic value which 
 | ----------- | ------------------------------------------------------------ | :------------------------------------------------: | :----------------: | :-----------: |
 | `name`      | The key that is used when assigning to `context.parameters`. |                       String                       | :white_check_mark: |               |
 | `endpoint`  | The endpoint to mount.                                       | [`Endpoint`](#endpoint-2) ([see also](#endpoints)) | :white_check_mark: |               |
-| `transform` | A (async) function that can transform the value.             |             Function or AsyncFunction              |                    |               |
+| `transform` | A (async) function that can transform the value. It's first an only parameter is an object with `{ name /* name of parameter */, context }`. If you're parameter is called `user` , the transform function will be called with an object `{ user, context }`. |             Function or AsyncFunction              |                    |               |
 
 > Parameters can also be provided as `{ name, endpoint, transform }`.
 
@@ -565,13 +568,13 @@ export default ({ endpoint }) => {
 	endpoint
 		.parameter('name', ({ endpoint }) => {
 			endpoint
-				.get(({ parameters: { name } }) => name);
+				.get(({ name }) => name);
 		})
 	
 		/* Below is an example of a shortcut method (also demonstrates transforms). */
 
 		.parameters.user({
-			transform: async (user) => await getMyUserFromId(user),
+			transform: async ({ user }) => await getMyUserFromId(user),
 			endpoint: ({ endpoint }) => {
 				endpoint
 					.get(({ parameters: { user } }) => `Hello ${user.name}!` });

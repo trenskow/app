@@ -39,10 +39,23 @@ describe('Application', () => {
 				.expect(404);
 		});
 
-		it ('should respond with 405 when a route is configured, but no methods has been defined,', async () => {
+		it ('should respond with 404 when a route is configured, but no methods has been defined,', async () => {
 			app.root(() => {});
 			await request
 				.get('/')
+				.expect(404);
+		});
+
+		it ('should respond with 405 when a route is configured, but request method is not specified,', async () => {
+			app.root(({ endpoint }) => {
+				endpoint
+					.post(() => {})
+					.put(() => {})
+					.delete(() => {});
+			});
+			await request
+				.get('/')
+				.expect('Allow', 'POST, PUT, DELETE')
 				.expect(405);
 		});
 

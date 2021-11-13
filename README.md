@@ -454,6 +454,8 @@ Returns a string that represents the current state of the application.
 
 An endpoint is what resembles the express.js router the most. It is the one where you define parameters and HTTP method handlers like `GET`, `POST`, `PUT`, `DELETE`, etc.
 
+> If an endpoint is requested with a HTTP method not implemented (and other HTTP methods has been implemented) it will respond with `405 Method Not Allowed` – otherwise if no methods has been implemented it will respond with `404 Not Found`.
+
 #### Constructor
 
 The constructor takes no parameters.

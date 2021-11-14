@@ -7,6 +7,7 @@
 // 
 
 import supertest from 'supertest';
+import { Endpoint, Router } from '../lib/index.js';
 
 import Application from '../lib/index.js';
 
@@ -40,19 +41,19 @@ describe('Application', () => {
 		});
 
 		it ('should respond with 404 when a route is configured, but no methods has been defined,', async () => {
-			app.root(() => {});
+			app.root(new Endpoint());
 			await request
 				.get('/')
 				.expect(404);
 		});
 
 		it ('should respond with 405 when a route is configured, but request method is not specified,', async () => {
-			app.root(({ endpoint }) => {
-				endpoint
+			app.root(
+				new Endpoint()
 					.post(() => {})
 					.put(() => {})
-					.delete(() => {});
-			});
+					.delete(() => {})
+			);
 			await request
 				.get('/')
 				.expect('Allow', 'POST, PUT, DELETE')
@@ -61,7 +62,10 @@ describe('Application', () => {
 
 		it ('should respond with 200 and `Hello, World!` when a GET method is configured.', async () => {
 
-			app.root(({ endpoint }) => endpoint.get(() => 'Hello, World!'));
+			app.root(
+				new Endpoint()
+					.get(() => 'Hello, World!')
+			);
 
 			await request
 				.get('/')
@@ -72,11 +76,12 @@ describe('Application', () => {
 
 		it ('should respond with 404 when a mount is configured but another is requested.', async () => {
 
-			app.root(({ endpoint }) => {
-				endpoint.mounts.helloWorld(({ endpoint }) => {
-					endpoint.get(async () => 'Hello!');
-				});
-			});
+			app.root(
+				new Endpoint()
+					.mounts.helloWorld(
+						new Endpoint()
+							.get(async () => 'Hello!'))
+			);
 
 			await request
 				.get('/world')
@@ -86,11 +91,12 @@ describe('Application', () => {
 
 		it ('should respond with 404 when a mount is configured but a deeper path is requested.', async () => {
 
-			app.root(({ endpoint }) => {
-				endpoint.mounts.helloWorld(({ endpoint }) => {
-					endpoint.get(async () => 'Hello!');
-				});
-			});
+			app.root(
+				new Endpoint()
+					.mounts.helloWorld(
+						new Endpoint()
+							.get(async () => 'Hello!')
+					));
 
 			await request
 				.get('/hello-world/i')
@@ -130,14 +136,14 @@ describe('Application', () => {
 
 		it ('should respond with parameter value.', async () => {
 
-			app.root(({ endpoint }) => {
-				endpoint.parameter({
-					name: 'value',
-					endpoint: ({ endpoint }) => {
-						endpoint.get(({ parameters: { value }}) => value);
-					}
-				});
-			});
+			app.root(
+				new Endpoint()
+					.parameter({
+						name: 'value',
+						endpoint: new Endpoint()
+							.get(({ parameters: { value }}) => value)
+					})
+			);
 
 			await request
 				.get('/the-actual-value/')
@@ -148,16 +154,15 @@ describe('Application', () => {
 
 		it ('should respond with parameter value (transformed).', async () => {
 
-			app.root(({ endpoint }) => {
-				endpoint
+			app.root(
+				new Endpoint()
 					.parameter({
 						name: 'target',
 						transform: ({ target }) => `Hello, ${target}!`,
-						endpoint: ({ endpoint }) => {
-							endpoint.get(({ parameters: { target }}) => target);
-						}
-					});
-			});
+						endpoint: new Endpoint()
+							.get(({ parameters: { target }}) => target)
+					})
+			);
 
 			await request
 				.get('/World/')
@@ -168,14 +173,13 @@ describe('Application', () => {
 
 		it ('should respond with a something generated in a transform.', async () => {
 
-			app.root(({ endpoint }) => {
-				endpoint
-					.middleware(({ router }) => {
-						router
-							.use(({ parameters }) => parameters.value = 'my-value');
-					})
-					.get(({ parameters: { value }}) => value);
-			});
+			app.root(
+				new Endpoint()
+					.middleware(
+						new Router()
+							.use(({ parameters }) => parameters.value = 'my-value'))
+					.get(({ parameters: { value }}) => value)
+			);
 
 			await request
 				.get('/')
@@ -186,9 +190,10 @@ describe('Application', () => {
 
 		it ('should respond with a value when using PUT on a catch-all method.', async () => {
 
-			app.root(({ endpoint }) => {
-				endpoint.all(() => 'Hello, World!');
-			});
+			app.root(
+				new Endpoint()
+					.all(() => 'Hello, World!')
+			);
 
 			await request
 				.put('/')
@@ -199,9 +204,10 @@ describe('Application', () => {
 
 		it ('should respond with a query value.', async () => {
 
-			app.root(({ endpoint }) => {
-				endpoint.get(({ query: { myValue } }) => myValue);
-			});
+			app.root(
+				new Endpoint()
+					.get(({ query: { myValue } }) => myValue)
+			);
 
 			await request
 				.get('/?my-value=this-is-my-value')
@@ -212,19 +218,18 @@ describe('Application', () => {
 
 		it ('should respond with a parameter value in a nested route.', async () => {
 
-			app.root(({ endpoint }) => {
-				endpoint
-					.mounts.first(({ endpoint }) => {
-						endpoint
-							.parameter('value', ({ endpoint }) => {
-								endpoint
-									.mount('third', ({ endpoint }) => {
-										endpoint
-											.get(({ parameters: { value } }) => value);
-									});
-							});
-					});
-			});
+			app.root(
+				new Endpoint()
+					.mounts.first(
+						new Endpoint()
+							.parameter('value',
+								new Endpoint()
+									.mount('third',
+										new Endpoint()
+											.get(({ parameters: { value } }) => value))
+							)
+					)
+			);
 
 			await request
 				.get('/first/second/third')
@@ -235,9 +240,10 @@ describe('Application', () => {
 
 		it ('should respond with `Hello, World!` when using catch-all method.', async () => {
 
-			app.root(({ endpoint }) => {
-				endpoint.get.catchAll(() => 'Hello, World!');
-			});
+			app.root(
+				new Endpoint()
+					.get.catchAll(() => 'Hello, World!')
+			);
 
 			await request
 				.get('/some/nested/path')
@@ -248,11 +254,14 @@ describe('Application', () => {
 
 		it ('should respond with `Hello, World!` when there is a space in path.', async () => {
 
-			app.root(({ endpoint }) => {
-				endpoint.mount('helloWorld', ({ endpoint }) => {
-					endpoint.get(() => 'Hello, World!');
-				});
-			});
+			app.root(
+				new Endpoint()
+					.mount(
+						'helloWorld',
+						new Endpoint()
+							.get(() => 'Hello, World!')
+					)
+			);
 
 			await request
 				.get('/hello world')
@@ -263,19 +272,19 @@ describe('Application', () => {
 
 		it ('should respond with `Hello, World!` from a mixin router.', async () => {
 
-			app.root(({ endpoint }) => {
-				endpoint
+			app.root(
+				new Endpoint()
 					.use((context) => context.parts = [])
-					.middleware(({ router }) => {
-						router
+					.middleware(
+						new Router()
 							.use(({ parts }) => parts.push('Hello'))
-							.mixin(({ router }) => {
-								router
-									.use(({ parts }) => parts.push('World!'));
-							});
-					})
-					.get(({ parts }) => parts.join(', '));
-			});
+							.mixin(
+								new Router()
+									.use(({ parts }) => parts.push('World!'))
+							)
+					)
+					.get(({ parts }) => parts.join(', '))
+			);
 
 			await request
 				.get('/')
@@ -286,13 +295,13 @@ describe('Application', () => {
 
 		it ('should respond with `Hello, World!` from a mixin endpoint.', async () => {
 
-			app.root(({ endpoint }) => {
-				endpoint
-					.mixin(({ endpoint }) => {
-						endpoint
-							.get(() => 'Hello, World!');
-					});
-			});
+			app.root(
+				new Endpoint()
+					.mixin(
+						new Endpoint()
+							.get(() => 'Hello, World!')
+					)
+			);
 
 			await request
 				.get('/')
@@ -314,13 +323,12 @@ describe('Application', () => {
 			app = new Application({ path: { mountMatchMode: 'strict' } });
 
 			const port = (await app
-				.root(({ endpoint }) => {
-					endpoint
-						.mounts.helloWorld(({ endpoint }) => {
-							endpoint
-								.get(() => 'Hello!');
-						});
-				})
+				.root(
+					new Endpoint()
+						.mounts.helloWorld(
+							new Endpoint()
+								.get(() => 'Hello!')
+						))
 				.open())
 				.port;
 

@@ -232,7 +232,7 @@ When a request is incoming, the `context`object looks like this.
 | `path.current`   | An array of strings that joined represents the path currently being processed. |       Array of String       |
 | `path.remaining` | An array of strings that joined represents the path that is above the currently processed path. |                             |
 | `query`          | An object holding the URL query parameters as an object ([keys has been converted to camel case](#query-parameters)). |           Object            |
-| `state`          | A string indicating the current state of the request – possible values are `'processing'`, `'rendering'`, `'completed'` or `'aborted'`. |           String            |
+| `state`          | A string indicating the current state of the request – possible values are `'routing'`, `'rendering'`, `'completed'` or `'aborted'`. |           String            |
 | `abort`          | A function that aborts the request. It takes the parameters `(error, brutally)`, where `error` is the error that needs to be handled by the [renderer](#renderer) – and `brutally` which indicates if the connection should also be closed. |        AsyncFunction        |
 | `render`         | A function that tells the application to stop processing the request and jump directly to the [renderer](#renderer). |          Function           |
 | `result`         | Whatever has been returned by the method handlers (should be written in the [`renderer`](#renderer)). |             Any             |
@@ -401,9 +401,9 @@ The provided endpoint is the one that will handle all requests to `/`. It is whe
 
 ###### Parameters
 
-| Name       | Description                                        |                       Type                       |      Required      | Default value |
-| ---------- | -------------------------------------------------- | :----------------------------------------------: | :----------------: | :-----------: |
-| `endpoint` | The endpoint that will handle all requests to `/`. | [Endpoint](#endpoint-2) ([see also](#endpoints)) | :white_check_mark: |               |
+| Name       | Description                                        |          Type           |      Required      | Default value |
+| ---------- | -------------------------------------------------- | :---------------------: | :----------------: | :-----------: |
+| `endpoint` | The endpoint that will handle all requests to `/`. | [Endpoint](#endpoint-2) | :white_check_mark: |               |
 
 ##### `renderer`
 
@@ -512,10 +512,10 @@ The method mounts another endpoint to a specific subpath.
 
 ###### Parameters
 
-| Name       | Description                                    |                        Type                        |      Required      | Default value |
-| ---------- | ---------------------------------------------- | :------------------------------------------------: | :----------------: | :-----------: |
-| `path`     | The subpath the endpoint should be mounted to. |         String ([see also](#mount-paths))          | :white_check_mark: |               |
-| `endpoint` | The endpoint to mount.                         | [`Endpoint`](#endpoint-2) ([see also](#endpoints)) | :white_check_mark: |               |
+| Name       | Description                                    |               Type                |      Required      | Default value |
+| ---------- | ---------------------------------------------- | :-------------------------------: | :----------------: | :-----------: |
+| `path`     | The subpath the endpoint should be mounted to. | String ([see also](#mount-paths)) | :white_check_mark: |               |
+| `endpoint` | The endpoint to mount.                         |     [`Endpoint`](#endpoint-2)     | :white_check_mark: |               |
 
 > Parameters can also be provided as `{ path, endpoint }`.
 
@@ -549,11 +549,11 @@ This method mounts another endpoint, but uses the path as a dynamic value which 
 
 ###### Parameters
 
-| Name        | Description                                                  |                        Type                        |      Required      | Default value |
-| ----------- | ------------------------------------------------------------ | :------------------------------------------------: | :----------------: | :-----------: |
-| `name`      | The key that is used when assigning to `context.parameters`. |                       String                       | :white_check_mark: |               |
-| `endpoint`  | The endpoint to mount.                                       | [`Endpoint`](#endpoint-2) ([see also](#endpoints)) | :white_check_mark: |               |
-| `transform` | A (async) function that can transform the value. It's first an only parameter is an object with `{ name /* name of parameter */, context }`. If you're parameter is called `user` , the transform function will be called with an object `{ user, context }`. |             Function or AsyncFunction              |                    |               |
+| Name        | Description                                                  |           Type            |      Required      | Default value |
+| ----------- | ------------------------------------------------------------ | :-----------------------: | :----------------: | :-----------: |
+| `name`      | The key that is used when assigning to `context.parameters`. |          String           | :white_check_mark: |               |
+| `endpoint`  | The endpoint to mount.                                       | [`Endpoint`](#endpoint-2) | :white_check_mark: |               |
+| `transform` | A (async) function that can transform the value. It's first an only parameter is an object with `{ name /* name of parameter */, context }`. If you're parameter is called `user` , the transform function will be called with an object `{ user, context }`. | Function or AsyncFunction |                    |               |
 
 > Parameters can also be provided as `{ name, endpoint, transform }`.
 
@@ -591,9 +591,9 @@ This method instals a piece of middleware. Middleware would typically be routes,
 
 ###### Parameters
 
-| Name     | Description                              |                     Type                     |      Required      | Default value |
-| -------- | ---------------------------------------- | :------------------------------------------: | :----------------: | :-----------: |
-| `router` | The router that contains the middleware. | [Router](#router-2) ([see also](#routers-2)) | :white_check_mark: |               |
+| Name     | Description                              |        Type         |      Required      | Default value |
+| -------- | ---------------------------------------- | :-----------------: | :----------------: | :-----------: |
+| `router` | The router that contains the middleware. | [Router](#router-2) | :white_check_mark: |               |
 
 ###### Example
 
@@ -653,9 +653,9 @@ This method mixes in another endpoint into this.
 
 ###### Parameters
 
-| Name       | Description                            |                        Type                        |      Required      | Default value |
-| ---------- | -------------------------------------- | :------------------------------------------------: | :----------------: | :-----------: |
-| `endpoint` | The endpoint to be mixed in into this. | [`Endpoint`](#endpoint-2) ([see also](#endpoints)) | :white_check_mark: |               |
+| Name       | Description                            |           Type            |      Required      | Default value |
+| ---------- | -------------------------------------- | :-----------------------: | :----------------: | :-----------: |
+| `endpoint` | The endpoint to be mixed in into this. | [`Endpoint`](#endpoint-2) | :white_check_mark: |               |
 
 ###### Example
 
@@ -714,9 +714,9 @@ This method mixes in another router into this.
 
 ###### Parameters
 
-| Name     | Description                          |                     Type                     |      Required      | Default value |
-| -------- | ------------------------------------ | :------------------------------------------: | :----------------: | :-----------: |
-| `router` | The router to be mixed in into this. | [Router](#router-2) ([see also](#routers-2)) | :white_check_mark: |               |
+| Name     | Description                          |        Type         |      Required      | Default value |
+| -------- | ------------------------------------ | :-----------------: | :----------------: | :-----------: |
+| `router` | The router to be mixed in into this. | [Router](#router-2) | :white_check_mark: |               |
 
 ###### Example
 

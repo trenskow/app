@@ -1,6 +1,6 @@
 {
   "name": "@trenskow/app",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "A small HTTP router.",
   "type": "module",
   "main": "index.js",

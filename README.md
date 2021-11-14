@@ -111,55 +111,58 @@ Below is an example and the result of an application that uses the package.
 ````javascript
 /* index.js */
 
-import { Application } from '@trenskow/app';
+import { Application, Endpoint } from '@trenskow/app';
 
 const app = new Application({ port: 8080 });
 
-await app
-	.root(async ({ router }) => {
-		router
-			.mount('iam', import('./iam.js'))
-	})
-	.renderer(async ({ result, response }) => {
-		response.headers.contentType = 'text/plain';
-		response.end(result);
-	})
-	.start();
-
-console.info(`Application is running on port ${app.port}`);
+(async () => {
+    
+    return (await app
+        .root(
+            new Endpoint()
+                .mount('iam', await import('./iam.js')))
+        .renderer(async ({ result, response }) => {
+            response.headers.contentType = 'text/plain';
+            response.end(result);
+        })
+        .start())
+    	.port;
+    
+})().then((port) => console.info(`Application is running on port ${app.port}`))
+    .catch(console.error);
 ````
 
 ````javascript
 /* iam.js */
 
-export default ({ router }) => {
-	router
-		.parameter({
-			name: 'name',
-			route: import('./name.js')
-		});
-};
+import { Endpoint } from '@trenskow/app';
+
+export default new Endpoint()
+	.parameter({
+        name: 'name',
+        endpoint: await import('./name.js')
+	});
 ````
 
 ````javascript
 /* greeter.js */
 
-export default ({ router }) => {
-	router
-		.use(async (context) => {
-			context.greeter = (name) => `Hello, ${name}!`;
-		});
-};
+import { Router } from '@trenskow/app';
+
+export default new Router()
+	.use(async (context) => {
+		context.greeter = (name) => `Hello, ${name}!`;
+	})
 ````
 
 ````javascript
 /* name.js */
 
-export default ({ router }) => {
-	router
-		.middleware(import('./greeter.js'))
-		.get(async ({ parameters: { name }, greeter }) => greeter(name));
-};
+import { Endpoint } from '@trenskow/app';
+
+export default new Endpoint()
+    .middleware(await import('./greeter.js'))
+    .get(async ({ parameters: { name }, greeter }) => greeter(name));
 ````
 
 #### Result
@@ -297,7 +300,7 @@ Endpoints can have a couple of things mounted / attached to it – those are.
 
 ###### When using endpoints
 
-Whenever a function (such as [`.mount`](#mount) or [`.parameter`](#parameters) or [`.root`](#root)) takes an endpoint, it can be provided in any of the following ways.
+Whenever a function (such as [`.mount`](#mount) or [`.parameter`](#parameters) or [`.root`](#root)) takes an endpoint as a parameter, it can be provided in any of the following ways.
 
 * An instance of [`Endpoint`](#endpoint-2).
 * A function that takes an object as parameters and configures the endpoint.
@@ -310,7 +313,7 @@ A router is the same as above, except it only supports [`.use`](#use).
 
 ###### When using routers
 
-As above, whenever a function takes a router, it can be provided in any of the following ways.
+As above, whenever a function takes a router as a parameter, it can be provided in any of the following ways.
 
 * An instance of [`Router`](#router-2).
 * A function that takes an object as parameters and configures the router.
@@ -498,10 +501,10 @@ There is also a catch-all variant, which makes the handler handle the path and s
 Below is an example.
 
 ````javascript
-export default ({ endpoint }) => {
-	endpoint
-		.get.catchAll(async () => 'Hello, World!');
-};
+import { Endpoint } from '@trenskow/app';
+
+export default new Endpoint()
+	.get.catchAll(async () => 'Hello, World!');
 ````
 
 ##### `mount`
@@ -524,21 +527,19 @@ The method mounts another endpoint to a specific subpath.
 Below is an example on how to use the method.
 
 ````javascript
-default export ({ endpoint }) => {
+import { Endpoint } from '@trenskow/app';
 
-	endpoint
-	
-		.mount('subpath', { endpoint }) => {
-			/* configure endpoint at `./subpath/` */
-		})
-	
-		/* Below is an example of a shortcut method. */
-		
-		.mounts.subpath(({ endpoint }) => {
-		   	/* configure endpoint at `./subpath/`.
-		});
-	
-};
+default export new Endpoint()
+
+    .mount('subpath', { endpoint }) => {
+        /* configure endpoint at `./subpath/` */
+    })
+
+    /* Below is an example of a shortcut method. */
+
+    .mounts.subpath(({ endpoint }) => {
+        /* configure endpoint at `./subpath/`. */
+    });
 ````
 
 ##### `parameter`
@@ -562,25 +563,21 @@ This method mounts another endpoint, but uses the path as a dynamic value which 
 Below is an example on how to use the method.
 
 ````javascript
-export default ({ endpoint }) => {
-	
-	endpoint
-		.parameter('name', ({ endpoint }) => {
-			endpoint
-				.get(({ name }) => name);
-		})
-	
-		/* Below is an example of a shortcut method (also demonstrates transforms). */
+import { Endpoint } from '@trenskow/app';
 
-		.parameters.user({
-			transform: async ({ user }) => await getMyUserFromId(user),
-			endpoint: ({ endpoint }) => {
-				endpoint
-					.get(({ parameters: { user } }) => `Hello ${user.name}!` });
-			}
-		});
-	
-};
+export default new Endpoint()
+
+    .parameter('name',
+        new Endpoint()
+            .get(({ name }) => name))
+
+    /* Below is an example of a shortcut method (also demonstrates transforms). */
+
+    .parameters.user({
+        transform: async ({ user }) => await getMyUserFromId(user),
+        endpoint: new Endpoint()
+	    	.get(({ parameters: { user } }) => `Hello ${user.name}!` })
+    });
 ````
 
 ##### `middleware`
@@ -602,47 +599,43 @@ Below is an example on how to implement a JSON body parser in a middleware route
 ````javascript
 /* my-endpoint.js */
 
-export default = ({ endpoint }) => {
-	endpoint
-		.middleware(import('./body-json-parser.js'))
-		.post(({ body }) => JSON.stringify(body)); /* echo body to response */
-};
+import { Endpoint } from '@trenskow/app';
+
+export default = new Endpoint()
+    .middleware(await import('./body-json-parser.js'))
+    .post(({ body }) => JSON.stringify(body)); /* echo body to response */
 ````
 
 ````javascript
 /* body-json-parser.js */
 
-import { Error as AppError } from '@trenskow/app';
+import { Router, Error as AppError } from '@trenskow/app';
 
-export default = ({ router }) => {
-	
-	router
-		.use(async (context) => {
+export default = new Router()
+	.use(async (context) => {
 	   
-			const { request } = context;
-			const { headers } = request;
-		
-			const [
-				contentType,
-				charset = 'utf-8'
-			] = headers.contentType?.match(/^application\/json(?:; ?charset=([a-z0-9-]+)(?:,|$))?/i);
-		
-			if (!/^application\/json$/i.test(contentType)) return;
-		
-			const chunks = [];
-		
-			try {
-				for await (const chunk in request) {
-					chunks.push(chunk);
-				}
-				context.body = JSON.parse(Buffer.concat(chunks).toString(charset));
-			} catch (error) {
-				throw new ApiError.BadRequest();
-			}
-			
-		});
-	
-};
+        const { request } = context;
+        const { headers } = request;
+
+        const [
+            contentType,
+            charset = 'utf-8'
+        ] = headers.contentType?.match(/^application\/json(?:; ?charset=([a-z0-9-]+)(?:,|$))?/i);
+
+        if (!/^application\/json$/i.test(contentType)) return;
+
+        const chunks = [];
+
+        try {
+            for await (const chunk in request) {
+                chunks.push(chunk);
+            }
+            context.body = JSON.parse(Buffer.concat(chunks).toString(charset));
+        } catch (error) {
+            throw new ApiError.BadRequest();
+        }
+
+    });
 ````
 
 ##### `.mixin`
@@ -664,20 +657,18 @@ Below is an example on how to use mixin.
 ````javascript
 /* endpoint-1.js */
 
-export default ({ endpoint }) => {
-	endpoint
-		.get(() => 'Hello, world!')
-		.mixin(import('./endpoint-2.js'));
-};
+import { Endpoint } from '@trenskow/app';
+
+export default new Endpoint()
+	.get(() => 'Hello, world!')
+	.mixin(await import('./endpoint-2.js'));
 ````
 
 ````javascript
 /* endpoint-2.js */
 
-export default ({ endpoint }) => {
-	endpoint
-		.post(async () => 'Hello, world from POST!');
-};
+export default new Endpoint()
+	.post(async () => 'Hello, world from POST!');
 ````
 
 ### `Router`
@@ -725,21 +716,21 @@ Below is an example on how to use mixin.
 ````javascript
 /* router-1.js */
 
-export default ({ router }) => {
-	router
-		.mixin(import('./router-2.js'));
-};
+import { Router } from '@trenskow/app';
+
+export default new Router()
+	.mixin(import('./router-2.js'));
 ````
 
 ````javascript
 /* router-2.js */
 
-export default ({ router }) => {
-	router
-		.use(async () => {
-			/* Your handler here */
-		});
-};
+import { Router } from '@trenskow/app';
+
+export default new Router()
+	.use(async () => {
+        /* Your handler here */
+	});
 ````
 
 ### `Request`

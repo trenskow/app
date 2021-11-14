@@ -84,6 +84,24 @@ describe('Application', () => {
 
 		});
 
+		it ('should respond with 404 when a mount is configured but a deeper path is requested.', async () => {
+
+			app.root(({ endpoint }) => {
+				endpoint.mounts.helloWorld(({ endpoint }) => {
+					endpoint.get(async () => 'Hello!');
+				});
+			});
+
+			await request
+				.get('/hello-world/i')
+				.expect(404);
+
+			await request
+				.get('/')
+				.expect(404);
+
+		});
+
 		it ('should respond with 405 when a wrong method is requested on a mount.', async () => {
 
 			await request

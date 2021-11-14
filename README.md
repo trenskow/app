@@ -287,7 +287,7 @@ Endpoints can have a couple of things mounted / attached to it – those are.
 	* using the [`.use`](#use) method of [`Router`](#router-2) or [`Endpoint`](#endpoint-2) 
 
 * Middleware
-	* sets a [`Router`](#routers-2) router to let the request be passed through
+	* sets a [`Router`](#routers-2) router to that the request will be passed through.
 	* using the [`.middleware`](#middleware) method of  [`Endpoint`](#endpoint-2) 
 
 * Methods
@@ -301,9 +301,8 @@ Whenever a function (such as [`.mount`](#mount) or [`.parameter`](#parameters) o
 
 * An instance of [`Endpoint`](#endpoint-2).
 * A function that takes an object as parameters and configures the endpoint.
-	* `({ endpoint, context }) => { endpoint... }`
+	* `({ endpoint }) => { endpoint.whatever()... }`
 * An object that has a `default` property that is set to one of the above.
-* An unresolved promise that resolves to one of the above.
 
 ##### Routers
 
@@ -315,9 +314,8 @@ As above, whenever a function takes a router, it can be provided in any of the f
 
 * An instance of [`Router`](#router-2).
 * A function that takes an object as parameters and configures the router.
-	* `({ router, context }) => { router... }` 
+	* `({ router }) => { router.whatever()... }` 
 * An object that has a `default` property that is set to one of the above.
-* An unresolved promise that resolves to one of the above.
 
 ##### Handlers
 
@@ -330,7 +328,6 @@ Whenever a function takes a handler as a parameter, it can be provided in any of
 * A function that takes a context object as it's parameter.
 	* `(context) => { /* do whatever */ }`
 * An object that has a `default` property that is set to the above.
-* An unresolved promise that resolved to one of the above.
 
 ## API Reference
 
@@ -469,7 +466,9 @@ The constructor takes no parameters.
 
 This method takes care of handing a specified HTTP method.
 
-> No more routes will be processed, when one of these handlers return. The returned value is send to the [renderer](#renderer).
+Supported HTTP methods are the same as those returned by [`http.METHODS`](https://nodejs.org/dist/latest/docs/api/http.html#httpmethods).
+
+No more routes will be processed, when one of these handlers return. The returned value is send to the [renderer](#renderer).
 
 > Returns the endpoint.
 

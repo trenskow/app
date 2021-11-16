@@ -35,8 +35,13 @@ It is inspired by [express](https://npmjs.org/package/express) – but uses mode
 	+ [`Application`](#application)
 		- [Constructor](#constructor)
 			* [Parameters](#parameters)
-		- [Instance methods](#instance-methods)
+		- [Events](#events)
+			* [`opening`](#opening)
 			* [`open`](#open)
+			* [`closing`](#closing)
+			* [`closed`](#closed)
+		- [Instance methods](#instance-methods)
+			* [`open`](#open-1)
 				+ [Parameters](#parameters-1)
 			* [`close`](#close)
 				+ [Parameters](#parameters-2)
@@ -84,7 +89,7 @@ It is inspired by [express](https://npmjs.org/package/express) – but uses mode
 			* [`headers`](#headers)
 	+ [`Response`](#response)
 		- [Constructor](#constructor-4)
-		- [Events](#events)
+		- [Events](#events-1)
 			* [`writeHead`](#writehead)
 			* [`processed`](#processed)
 		- [Instance methods](#instance-methods-3)
@@ -99,7 +104,7 @@ It is inspired by [express](https://npmjs.org/package/express) – but uses mode
 			* [`getHeaderNames`](#getheadernames)
 		- [Instance properties](#instance-properties-1)
 			* [`headers`](#headers-1)
-	+ [License](#license)
+* [License](#license)
 
 ## Usage
 
@@ -107,7 +112,7 @@ It is inspired by [express](https://npmjs.org/package/express) – but uses mode
 
 Below is an example and the result of an application that uses the package.
 
-> This example complicates a route that could be vastly simplified. It just does this to show some the package features.
+> This example complicates a route that could be vastly simplified. It just does this to show off some of the features of the package.
 
 #### Code
 
@@ -234,14 +239,14 @@ When a request is incoming, the `context`object looks like this.
 | `response`       | The response object from the HTTP server.                                                                                                                                                                                                   |    [Response](#Response)    |
 | `parameters`     | An empty object that will contain the parameters picked up when processing the parameters (if any) of the requested path.                                                                                                                   |           Object            |
 | `path`           | An object that has properties representing different paths.                                                                                                                                                                                 |           Object            |
-| `path.full`      | An array of strings that joined represent the path components of the fully requested path.                                                                                                                                                  |       Array of String       |
+| `path.full`      | An array of strings that joined represent the path of the fully requested path.                                                                                                                                                             |       Array of String       |
 | `path.current`   | An array of strings that joined represents the path currently being processed.                                                                                                                                                              |       Array of String       |
 | `path.remaining` | An array of strings that joined represents the path that is above the currently processed path.                                                                                                                                             |                             |
 | `query`          | An object holding the URL query parameters as an object ([keys has been converted to camel case](#query-parameters)).                                                                                                                       |           Object            |
 | `state`          | A string indicating the current state of the request – possible values are `'routing'`, `'rendering'`, `'completed'` or `'aborted'`.                                                                                                        |           String            |
 | `abort`          | A function that aborts the request. It takes the parameters `(error, brutally)`, where `error` is the error that needs to be handled by the [renderer](#renderer) – and `brutally` which indicates if the connection should also be closed. |        AsyncFunction        |
 | `render`         | A function that tells the application to stop processing the request and jump directly to the [renderer](#renderer).                                                                                                                        |          Function           |
-| `result`         | Whatever has been returned by the method handlers (should be written in the [`renderer`](#renderer)).                                                                                                                                       |             Any             |
+| `result`         | Whatever has been returned by the method handlers (should be written to the response in the [`renderer`](#renderer)).                                                                                                                       |             Any             |
 
 ##### Example
 
@@ -249,7 +254,7 @@ Below is an example on how the context is used (also see the example in the begi
 
 ````javascript
 .get(context) => { /* Use all the available information. */ }
-.get({ parameters }) => /* Use JavaScript object destructuring to get only the information you need. /*
+.get({ parameters }) => { /* Use JavaScript object destructuring to get only the information you need. /* }
 ````
 
 #### Casing
@@ -270,7 +275,7 @@ Request with `?my-parameter=value` is accessible through `context.query.myParame
 
 ##### Mount paths
 
-When [match mode](#constructor) is set to `'loosely'` (default) a request the subpath `my-route` or `my_route` will match an endpoint mounted at `myRoute`.
+When [match mode](#constructor) is set to `'loosely'` (default) a request withe the path component `my-route` or `my_route` will match an endpoint mounted at `myRoute`.
 
 #### Endpoints, routers and handlers
 
@@ -297,8 +302,8 @@ Endpoints can have a couple of things mounted / attached to it – those are.
 	* using the [`.middleware`](#middleware) method of  [`Endpoint`](#endpoint-2) 
 
 * Methods
-  * using the [`.get`, `.post`, `.put`, `.delete`, etc.](#get-post-put-delete-etc) method of [`Endpoint`](#endpoint-2)
-  * When a method returns the request ends and the returned value is send to the client as a response (through the [`Application#renderer`](#renderer))
+	* using the [`.get`, `.post`, `.put`, `.delete`, etc.](#get-post-put-delete-etc) method of [`Endpoint`](#endpoint-2)
+	* When a method returns the request ends and the returned value is send to the client as a response (through the [`Application#renderer`](#renderer))
 
 
 ###### When using endpoints
@@ -306,9 +311,7 @@ Endpoints can have a couple of things mounted / attached to it – those are.
 Whenever a function (such as [`.mount`](#mount) or [`.parameter`](#parameters) or [`.root`](#root)) takes an endpoint as a parameter, it can be provided in any of the following ways.
 
 * An instance of [`Endpoint`](#endpoint-2).
-* A function that takes an object as parameters and configures the endpoint.
-	* `({ endpoint }) => { endpoint.whatever()... }`
-* An object that has a `default` property that is set to one of the above.
+* An object that has a `default` key that has an instance of `Endpoint` as the value (useful when using inline imports).
 
 ##### Routers
 
@@ -319,13 +322,11 @@ A router is the same as above, except it only supports [`.use`](#use).
 As above, whenever a function takes a router as a parameter, it can be provided in any of the following ways.
 
 * An instance of [`Router`](#router-2).
-* A function that takes an object as parameters and configures the router.
-	* `({ router }) => { router.whatever()... }` 
-* An object that has a `default` property that is set to one of the above.
+* An object that has a `default` key that has an instance of `Router` as the value (useful when using inline imports).
 
 ##### Handlers
 
-Handlers are functions that handles a request. Handlers are functions that takes the context object as it's parameter.
+Handlers are functions that handles a request. Handlers are functions that takes the context object as it's only parameter.
 
 ###### When using handlers
 
@@ -343,15 +344,17 @@ The `Application` class holds an application and is responsible for handling and
 
 > If no root route has been set, all requests will be responded with `404 Not Found`.
 
+> extends [`events.EventEmitter`](https://nodejs.org/dist/latest/docs/api/events.html#class-eventemitter)
+
 #### Constructor
 
-The `Application` class takes and "options" object as it's parameter.
+The `Application` class takes an "options" object as it's parameter.
 
 ##### Parameters
 
 | Name                     | Description                                                                                                                                       |           Type            | Required |        Default value         |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- | :-----------------------: | :------: | :--------------------------: |
-| options                  | An object holding the configuration options.                                                                                                      |          Object           |          |              {}              |
+| options                  | An object representing the options.                                                                                                               |          Object           |          |              {}              |
 | `options.port`           | The port at which to listen for incoming connections.                                                                                             |          Number           |          | `0` (automatically assigned) |
 | `options.RequestType`    | An object that inherits from the [`Request`](#request-2) class (an `http.IncomingMessage` subclass) that is used as the request object in routes. |           class           |          |    [`Request`](#Request)     |
 | `options.ResponseType`   | An object that inherits from the [`Response`](#response-2) class (`http.ServerResponse` subclass) that is used as the response object in routes.  |           class           |          |   [`Response`](#Response)    |
@@ -360,6 +363,26 @@ The `Application` class takes and "options" object as it's parameter.
 | `options.server`         | An object that represents how to instantiate the HTTP server.                                                                                     |          Object           |          |             `{}`             |
 | `options.server.create`  | A function that is able to create a server.                                                                                                       |         Function          |          |     `http.createServer`      |
 | `options.server.options` | An object to be passed as options when creating a server.                                                                                         |          Object           |          |             `{}`             |
+
+#### Events
+
+##### `opening`
+
+Indicates that the server is starting.
+
+##### `opened`
+
+Indicates the the server was started.
+
+The listener callback will be passed the port number the server is listening on.
+
+##### `closing`
+
+Indicates that the server is being stopped.
+
+##### `closed`
+
+Indicates that the server has stopped.
 
 #### Instance methods
 
@@ -377,7 +400,7 @@ This method opens (starts) the server. The server will accept connections using 
 | ------ | ----------------------------------------------------------------------------------- | :----: | :------: | :------------------------------------------------------: |
 | `port` | If no port was provided in the [constructor](#constructor) it can be provided here. | Number |          | Value set in constructor or `0` (automatically assigned) |
 
-> Parameters can be passed both as `stop(port)` or `stop({ port })`.
+> Parameters can be passed both as `open(port)` or `open({ port })`.
 
 ##### `close`
 
@@ -393,7 +416,7 @@ This method closes (stops) the server.
 | --------------------- | -------------------------------------------------------------- | :---: | :------: | :-----------: |
 | `awaitAllConnections` | Indicates not to return until all connections has been closed. | Bool  |          |    `false`    |
 
-> Parameters can be passed both as `stop(awaitAllConnections)` or `stop({ awaitAllConnections })`.
+> Parameters can be passed both as `close(awaitAllConnections)` or `close({ awaitAllConnections })`.
 
 ##### `root`
 
@@ -415,9 +438,7 @@ The provided endpoint is the one that will handle all requests to `/`. It is whe
 
 Sets the renderer function (async/non-async).
 
-This method is responsible to turn whatever the routes have returned and write it to the response.
-
-JSON encoding of values would be something to put in here.
+This method is responsible for writing to the response whatever the routes have returned (JSON encoding of values would be something to put in here).
 
 > Returns the application.
 
@@ -460,7 +481,7 @@ Returns a string that represents the current state of the application.
 
 An endpoint is what resembles the express.js router the most. It is the one where you define parameters and HTTP method handlers like `GET`, `POST`, `PUT`, `DELETE`, etc.
 
-> If an endpoint is requested with a HTTP method not implemented (and other HTTP methods has been implemented) it will respond with `405 Method Not Allowed` – otherwise if no methods has been implemented it will respond with `404 Not Found`.
+> If an endpoint is requested with a HTTP method not implemented by the endpoint it will respond with `405 Method Not Allowed` – otherwise if no HTTP methods has been implemented at all on the endpoint it will respond with `404 Not Found`.
 
 #### Constructor
 
@@ -499,7 +520,7 @@ default export ({ endpoint }) => {
 
 ###### Catch all
 
-There is also a catch-all variant, which makes the handler handle the path and subsequent subpaths.
+There is also a catch-all variant, which makes the handler able to handle the all paths from that endpoint (useful when serving files from a directory).
 
 Below is an example.
 
@@ -518,10 +539,10 @@ The method mounts another endpoint to a specific subpath.
 
 ###### Parameters
 
-| Name       | Description                                    |               Type                |      Required      | Default value |
-| ---------- | ---------------------------------------------- | :-------------------------------: | :----------------: | :-----------: |
-| `path`     | The subpath the endpoint should be mounted to. | String ([see also](#mount-paths)) | :white_check_mark: |               |
-| `endpoint` | The endpoint to mount.                         |     [`Endpoint`](#endpoint-2)     | :white_check_mark: |               |
+| Name       | Description                                           |               Type                |      Required      | Default value |
+| ---------- | ----------------------------------------------------- | :-------------------------------: | :----------------: | :-----------: |
+| `path`     | The path component the endpoint should be mounted to. | String ([see also](#mount-paths)) | :white_check_mark: |               |
+| `endpoint` | The endpoint to mount.                                |     [`Endpoint`](#endpoint-2)     | :white_check_mark: |               |
 
 > Parameters can also be provided as `{ path, endpoint }`.
 
@@ -534,14 +555,14 @@ import { Endpoint } from '@trenskow/app';
 
 default export new Endpoint()
 
-	.mount('subpath', { endpoint }) => {
-		/* configure endpoint at `./subpath/` */
+	.mount('pathComponent', { endpoint }) => {
+		/* configure endpoint at `./path-component/` */
 	})
 
 	/* Below is an example of a shortcut method. */
 
-	.mounts.subpath(({ endpoint }) => {
-		/* configure endpoint at `./subpath/`. */
+	.mounts.pathComponent(({ endpoint }) => {
+		/* configure endpoint at `./path-component/`. */
 	});
 ````
 
@@ -572,7 +593,7 @@ export default new Endpoint()
 
 	.parameter('name',
 		new Endpoint()
-			.get(({ name }) => name))
+			.get(({ parameters: { name } }) => name))
 
 	/* Below is an example of a shortcut method (also demonstrates transforms). */
 
@@ -585,7 +606,7 @@ export default new Endpoint()
 
 ##### `middleware`
 
-This method instals a piece of middleware. Middleware would typically be routes, that do not handle an endpoint, but works as a transform or service provider. Body parsers and rate limiters would typically be installed as middleware.
+This method i attaches a piece of middleware. Middleware would typically be routes that do not handle an endpoint, but works as a transform or service provider (body parsers and rate limiters would typically be installed as middleware).
 
 > Returns the endpoint.
 
@@ -684,7 +705,7 @@ The constructor takes no parameters.
 
 ##### `.use`
 
-This method is like the [HTTP method handlers](#get-post-put-delete-etc) of [`Endpoint`](#endpoint-2), except it discards the return value and continues to process the request.
+This method is like the [HTTP method handlers](#get-post-put-delete-etc) of [`Endpoint`](#endpoint-2), except it is called with all HTTP methods and the return value is ignored. Routing continues after handler returns.
 
 Typically used by middleware.
 
@@ -722,7 +743,7 @@ Below is an example on how to use mixin.
 import { Router } from '@trenskow/app';
 
 export default new Router()
-	.mixin(import('./router-2.js'));
+	.mixin(await import('./router-2.js'));
 ````
 
 ````javascript
@@ -770,7 +791,7 @@ Indicates that the header was written to the client.
 
 Indicates that the response was processed.
 
-The listener callback will be passed an `Error` object or `undefined` if an no error occurred.
+The listener callback will be passed an `Error` object if an error occurred – or `undefined` if no error occurred.
 
 #### Instance methods
 
@@ -825,7 +846,7 @@ Returns an array of all header names set.
 
 Returns an object that has the response headers as key/values, where the [keys has been converted to camel case](#casing).
 
-### License
+## License
 
 See license in LICENSE
 

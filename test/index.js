@@ -320,7 +320,7 @@ describe('Application', () => {
 
 		before(async () => {
 
-			app = new Application({ path: { mountMatchMode: 'strict' } });
+			app = new Application({ path: { matchMode: 'strict' } });
 
 			const port = (await app
 				.root(

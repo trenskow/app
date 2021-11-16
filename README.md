@@ -80,10 +80,13 @@ It is inspired by [express](https://npmjs.org/package/express) – but uses mode
 				+ [Example](#example-8)
 	+ [`Request`](#request)
 		- [Constructor](#constructor-3)
-		- [Properties](#properties-1)
+		- [Instance properties](#instance-properties)
 			* [`headers`](#headers)
 	+ [`Response`](#response)
 		- [Constructor](#constructor-4)
+		- [Events](#events)
+			* [`writeHead`](#writehead)
+			* [`processed`](#processed)
 		- [Instance methods](#instance-methods-3)
 			* [`getHeader`](#getheader)
 				+ [Parameters](#parameters-12)
@@ -94,7 +97,7 @@ It is inspired by [express](https://npmjs.org/package/express) – but uses mode
 			* [`hasHeader`](#hasheader)
 				+ [Parameters](#parameters-15)
 			* [`getHeaderNames`](#getheadernames)
-		- [Properties](#properties-2)
+		- [Instance properties](#instance-properties-1)
 			* [`headers`](#headers-1)
 	+ [License](#license)
 
@@ -116,20 +119,20 @@ import { Application, Endpoint } from '@trenskow/app';
 const app = new Application({ port: 8080 });
 
 (async () => {
-    
-    return (await app
-        .root(
-            new Endpoint()
-                .mount('iam', await import('./iam.js')))
-        .renderer(async ({ result, response }) => {
-            response.headers.contentType = 'text/plain';
-            response.end(result);
-        })
-        .start())
-    	.port;
-    
+
+	return (await app
+		.root(
+			new Endpoint()
+				.mount('iam', await import('./iam.js')))
+		.renderer(async ({ result, response }) => {
+			response.headers.contentType = 'text/plain';
+			response.end(result);
+		})
+		.start())
+		.port;
+
 })().then((port) => console.info(`Application is running on port ${app.port}`))
-    .catch(console.error);
+	.catch(console.error);
 ````
 
 ````javascript
@@ -139,8 +142,8 @@ import { Endpoint } from '@trenskow/app';
 
 export default new Endpoint()
 	.parameter({
-        name: 'name',
-        endpoint: await import('./name.js')
+		name: 'name',
+		endpoint: await import('./name.js')
 	});
 ````
 
@@ -161,8 +164,8 @@ export default new Router()
 import { Endpoint } from '@trenskow/app';
 
 export default new Endpoint()
-    .middleware(await import('./greeter.js'))
-    .get(async ({ parameters: { name }, greeter }) => greeter(name));
+	.middleware(await import('./greeter.js'))
+	.get(async ({ parameters: { name }, greeter }) => greeter(name));
 ````
 
 #### Result
@@ -224,21 +227,21 @@ Middleware can also use the context to provide data and services, which is then 
 
 When a request is incoming, the `context`object looks like this.
 
-| Name             | Description                                                  |            Type             |
-| ---------------- | ------------------------------------------------------------ | :-------------------------: |
-| `application`    | The application instance that has received the request.      | [Application](#Application) |
-| `request`        | The request object from the HTTP server.                     |     [Request](#Request)     |
-| `response`       | The response object from the HTTP server.                    |    [Response](#Response)    |
-| `parameters`     | An empty object that will contain the parameters picked up when processing the parameters (if any) of the requested path. |           Object            |
-| `path`           | An object that has properties representing different paths.  |           Object            |
-| `path.full`      | An array of strings that joined represent the path components of the fully requested path. |       Array of String       |
-| `path.current`   | An array of strings that joined represents the path currently being processed. |       Array of String       |
-| `path.remaining` | An array of strings that joined represents the path that is above the currently processed path. |                             |
-| `query`          | An object holding the URL query parameters as an object ([keys has been converted to camel case](#query-parameters)). |           Object            |
-| `state`          | A string indicating the current state of the request – possible values are `'routing'`, `'rendering'`, `'completed'` or `'aborted'`. |           String            |
+| Name             | Description                                                                                                                                                                                                                                 |            Type             |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------: |
+| `application`    | The application instance that has received the request.                                                                                                                                                                                     | [Application](#Application) |
+| `request`        | The request object from the HTTP server.                                                                                                                                                                                                    |     [Request](#Request)     |
+| `response`       | The response object from the HTTP server.                                                                                                                                                                                                   |    [Response](#Response)    |
+| `parameters`     | An empty object that will contain the parameters picked up when processing the parameters (if any) of the requested path.                                                                                                                   |           Object            |
+| `path`           | An object that has properties representing different paths.                                                                                                                                                                                 |           Object            |
+| `path.full`      | An array of strings that joined represent the path components of the fully requested path.                                                                                                                                                  |       Array of String       |
+| `path.current`   | An array of strings that joined represents the path currently being processed.                                                                                                                                                              |       Array of String       |
+| `path.remaining` | An array of strings that joined represents the path that is above the currently processed path.                                                                                                                                             |                             |
+| `query`          | An object holding the URL query parameters as an object ([keys has been converted to camel case](#query-parameters)).                                                                                                                       |           Object            |
+| `state`          | A string indicating the current state of the request – possible values are `'routing'`, `'rendering'`, `'completed'` or `'aborted'`.                                                                                                        |           String            |
 | `abort`          | A function that aborts the request. It takes the parameters `(error, brutally)`, where `error` is the error that needs to be handled by the [renderer](#renderer) – and `brutally` which indicates if the connection should also be closed. |        AsyncFunction        |
-| `render`         | A function that tells the application to stop processing the request and jump directly to the [renderer](#renderer). |          Function           |
-| `result`         | Whatever has been returned by the method handlers (should be written in the [`renderer`](#renderer)). |             Any             |
+| `render`         | A function that tells the application to stop processing the request and jump directly to the [renderer](#renderer).                                                                                                                        |          Function           |
+| `result`         | Whatever has been returned by the method handlers (should be written in the [`renderer`](#renderer)).                                                                                                                                       |             Any             |
 
 ##### Example
 
@@ -267,7 +270,7 @@ Request with `?my-parameter=value` is accessible through `context.query.myParame
 
 ##### Mount paths
 
-When [mount match mode](#constructor) is set to `'loosely'` (default) a request the subpath `my-route` or `my_route` will match an endpoint mounted at `myRoute`.
+When [match mode](#constructor) is set to `'loosely'` (default) a request the subpath `my-route` or `my_route` will match an endpoint mounted at `myRoute`.
 
 #### Endpoints, routers and handlers
 
@@ -353,7 +356,7 @@ The `Application` class takes and "options" object as it's parameter.
 | `options.RequestType`    | An object that inherits from the [`Request`](#request-2) class (an `http.IncomingMessage` subclass) that is used as the request object in routes. |           class           |          |    [`Request`](#Request)     |
 | `options.ResponseType`   | An object that inherits from the [`Response`](#response-2) class (`http.ServerResponse` subclass) that is used as the response object in routes.  |           class           |          |   [`Response`](#Response)    |
 | `path`                   | An object that represents path related options.                                                                                                   |          Object           |          |             `{}`             |
-| `path.mountMatchMode`    | Indicates [how to match requests to mounted paths](#mount-paths).                                                                                 | `'loosely'` or `'strict'` |          |         `'loosely'`          |
+| `path.matchMode`         | Indicates [how to match requests to mounted paths](#mount-paths).                                                                                 | `'loosely'` or `'strict'` |          |         `'loosely'`          |
 | `options.server`         | An object that represents how to instantiate the HTTP server.                                                                                     |          Object           |          |             `{}`             |
 | `options.server.create`  | A function that is able to create a server.                                                                                                       |         Function          |          |     `http.createServer`      |
 | `options.server.options` | An object to be passed as options when creating a server.                                                                                         |          Object           |          |             `{}`             |
@@ -531,15 +534,15 @@ import { Endpoint } from '@trenskow/app';
 
 default export new Endpoint()
 
-    .mount('subpath', { endpoint }) => {
-        /* configure endpoint at `./subpath/` */
-    })
+	.mount('subpath', { endpoint }) => {
+		/* configure endpoint at `./subpath/` */
+	})
 
-    /* Below is an example of a shortcut method. */
+	/* Below is an example of a shortcut method. */
 
-    .mounts.subpath(({ endpoint }) => {
-        /* configure endpoint at `./subpath/`. */
-    });
+	.mounts.subpath(({ endpoint }) => {
+		/* configure endpoint at `./subpath/`. */
+	});
 ````
 
 ##### `parameter`
@@ -550,10 +553,10 @@ This method mounts another endpoint, but uses the path as a dynamic value which 
 
 ###### Parameters
 
-| Name        | Description                                                  |           Type            |      Required      | Default value |
-| ----------- | ------------------------------------------------------------ | :-----------------------: | :----------------: | :-----------: |
-| `name`      | The key that is used when assigning to `context.parameters`. |          String           | :white_check_mark: |               |
-| `endpoint`  | The endpoint to mount.                                       | [`Endpoint`](#endpoint-2) | :white_check_mark: |               |
+| Name        | Description                                                                                                                                                                                                                                                   |           Type            |      Required      | Default value |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-----------------------: | :----------------: | :-----------: |
+| `name`      | The key that is used when assigning to `context.parameters`.                                                                                                                                                                                                  |          String           | :white_check_mark: |               |
+| `endpoint`  | The endpoint to mount.                                                                                                                                                                                                                                        | [`Endpoint`](#endpoint-2) | :white_check_mark: |               |
 | `transform` | A (async) function that can transform the value. It's first an only parameter is an object with `{ name /* name of parameter */, context }`. If you're parameter is called `user` , the transform function will be called with an object `{ user, context }`. | Function or AsyncFunction |                    |               |
 
 > Parameters can also be provided as `{ name, endpoint, transform }`.
@@ -567,17 +570,17 @@ import { Endpoint } from '@trenskow/app';
 
 export default new Endpoint()
 
-    .parameter('name',
-        new Endpoint()
-            .get(({ name }) => name))
+	.parameter('name',
+		new Endpoint()
+			.get(({ name }) => name))
 
-    /* Below is an example of a shortcut method (also demonstrates transforms). */
+	/* Below is an example of a shortcut method (also demonstrates transforms). */
 
-    .parameters.user({
-        transform: async ({ user }) => await getMyUserFromId(user),
-        endpoint: new Endpoint()
-	    	.get(({ parameters: { user } }) => `Hello ${user.name}!` })
-    });
+	.parameters.user({
+		transform: async ({ user }) => await getMyUserFromId(user),
+		endpoint: new Endpoint()
+			.get(({ parameters: { user } }) => `Hello ${user.name}!` })
+	});
 ````
 
 ##### `middleware`
@@ -602,8 +605,8 @@ Below is an example on how to implement a JSON body parser in a middleware route
 import { Endpoint } from '@trenskow/app';
 
 export default = new Endpoint()
-    .middleware(await import('./body-json-parser.js'))
-    .post(({ body }) => JSON.stringify(body)); /* echo body to response */
+	.middleware(await import('./body-json-parser.js'))
+	.post(({ body }) => JSON.stringify(body)); /* echo body to response */
 ````
 
 ````javascript
@@ -613,29 +616,29 @@ import { Router, Error as AppError } from '@trenskow/app';
 
 export default = new Router()
 	.use(async (context) => {
-	   
-        const { request } = context;
-        const { headers } = request;
+	
+		const { request } = context;
+		const { headers } = request;
 
-        const [
-            contentType,
-            charset = 'utf-8'
-        ] = headers.contentType?.match(/^application\/json(?:; ?charset=([a-z0-9-]+)(?:,|$))?/i);
+		const [
+			contentType,
+			charset = 'utf-8'
+		] = headers.contentType?.match(/^application\/json(?:; ?charset=([a-z0-9-]+)(?:,|$))?/i);
 
-        if (!/^application\/json$/i.test(contentType)) return;
+		if (!/^application\/json$/i.test(contentType)) return;
 
-        const chunks = [];
+		const chunks = [];
 
-        try {
-            for await (const chunk in request) {
-                chunks.push(chunk);
-            }
-            context.body = JSON.parse(Buffer.concat(chunks).toString(charset));
-        } catch (error) {
-            throw new ApiError.BadRequest();
-        }
+		try {
+			for await (const chunk of request) {
+				chunks.push(chunk);
+			}
+			context.body = JSON.parse(Buffer.concat(chunks).toString(charset));
+		} catch (error) {
+			throw new ApiError.BadRequest();
+		}
 
-    });
+	});
 ````
 
 ##### `.mixin`
@@ -729,7 +732,7 @@ import { Router } from '@trenskow/app';
 
 export default new Router()
 	.use(async () => {
-        /* Your handler here */
+		/* Your handler here */
 	});
 ````
 
@@ -737,15 +740,13 @@ export default new Router()
 
 This class represents the request. Each individual request has its own instance assigned to `context.request`, where it accessible from endpoint, routers and handlers.
 
-> extends `http.IncomingMessage`
+> extends [`http.IncomingMessage`](https://nodejs.org/dist/latest/docs/api/http.html#class-httpincomingmessage)
 
 #### Constructor
 
-See [`http.IncomingMessage`](https://nodejs.org/dist/latest/docs/api/http.html#class-httpincomingmessage).
+`Request` instances are constructed by the HTTP server and should not be initialized directly.
 
-`Request` instances are constructed by the HTTP server.
-
-#### Properties
+#### Instance properties
 
 ##### `headers`
 
@@ -753,13 +754,23 @@ Returns an object that has the request headers as key/values, where the [keys ha
 
 ### `Response`
 
+> extends [`http.ServerResponse`](https://nodejs.org/dist/latest/docs/api/http.html#class-httpserverresponse)
+
 #### Constructor
 
-See [`http.ServerResponse`](https://nodejs.org/dist/latest/docs/api/http.html#class-httpserverresponse).
+`Response` instances are constructed by the HTTP server and should not be initialized directly.
 
-> extends `http.ServerResponse`
+#### Events
 
-`Response` instances are constructed by the HTTP server.
+##### `writeHead`
+
+Indicates that the header was written to the client.
+
+##### `processed`
+
+Indicates that the response was processed.
+
+The listener callback will be passed an `Error` object or `undefined` if an no error occurred.
 
 #### Instance methods
 
@@ -808,7 +819,7 @@ Return `true` if header has been set.
 
 Returns an array of all header names set.
 
-#### Properties
+#### Instance properties
 
 ##### `headers`
 

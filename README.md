@@ -71,16 +71,16 @@ It is inspired by [express](https://npmjs.org/package/express) – but uses mode
 			* [`middleware`](#middleware)
 				+ [Parameters](#parameters-8)
 				+ [Example](#example-5)
-			* [`.mixin`](#mixin)
+			* [`mixin`](#mixin)
 				+ [Parameters](#parameters-9)
 				+ [Example](#example-6)
 	+ [`Router`](#router-1)
 		- [Constructor](#constructor-2)
 		- [Instance methods](#instance-methods-2)
-			* [`.use`](#use)
+			* [`use`](#use)
 				+ [Parameters](#parameters-10)
 				+ [Example](#example-7)
-			* [`.mixin`](#mixin-1)
+			* [`mixin`](#mixin-1)
 				+ [Parameters](#parameters-11)
 				+ [Example](#example-8)
 	+ [`Request`](#request)
@@ -662,7 +662,7 @@ export default = new Router()
 	});
 ````
 
-##### `.mixin`
+##### `mixin`
 
 This method mixes in another endpoint into this.
 
@@ -703,7 +703,7 @@ The constructor takes no parameters.
 
 #### Instance methods
 
-##### `.use`
+##### `use`
 
 This method is like the [HTTP method handlers](#get-post-put-delete-etc) of [`Endpoint`](#endpoint-2), except it is called with all HTTP methods and the return value is ignored. Routing continues after handler returns.
 
@@ -721,7 +721,7 @@ Typically used by middleware.
 
 > See example [above](#example-6).
 
-##### `.mixin`
+##### `mixin`
 
 This method mixes in another router into this.
 

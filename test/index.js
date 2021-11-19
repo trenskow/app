@@ -74,6 +74,47 @@ describe('Application', () => {
 
 		});
 
+		it ('should ignore multiple GET method handlers and respond with 200 and `Hello, World!`.', async () => {
+
+			app.root(
+				new Endpoint()
+					.get(() => 'Ignore this!')
+					.post(() => 'Not used')
+					.get(() => 'Hello, World!')
+			);
+
+			await request
+				.get('/')
+				.expect('Content-Type', 'text/plain; charset=utf-8')
+				.expect(200, 'Hello, World!');
+
+		});
+
+		it ('should ignore GET method handler when path has been rewritten and respond with 200 and `Hello, World!`.', async () => {
+
+			app.root(
+				new Endpoint()
+					.use(({ path }) => {
+						if (path.remaining[0] === 'ignore') {
+							path.remaining = ['hello'];
+						}
+					})
+					.mounts.ignore(
+						new Endpoint()
+							.get(() => 'Ignore this!'))
+					.mounts.hello(
+						new Endpoint()
+							.get(() => 'Hello!')
+					)
+			);
+
+			await request
+				.get('/ignore')
+				.expect('Content-Type', 'text/plain; charset=utf-8')
+				.expect(200, 'Hello!');
+
+		});
+
 		it ('should respond with 404 when a mount is configured but another is requested.', async () => {
 
 			app.root(

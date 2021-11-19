@@ -232,21 +232,21 @@ Middleware can also use the context to provide data and services, which is then 
 
 When a request is incoming, the `context`object looks like this.
 
-| Name             | Description                                                                                                                                                                                                                                 |            Type             |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------: |
-| `application`    | The application instance that has received the request.                                                                                                                                                                                     | [Application](#Application) |
-| `request`        | The request object from the HTTP server.                                                                                                                                                                                                    |     [Request](#Request)     |
-| `response`       | The response object from the HTTP server.                                                                                                                                                                                                   |    [Response](#Response)    |
-| `parameters`     | An empty object that will contain the parameters picked up when processing the parameters (if any) of the requested path.                                                                                                                   |           Object            |
-| `path`           | An object that has properties representing different paths.                                                                                                                                                                                 |           Object            |
-| `path.full`      | An array of strings that joined represent the path of the fully requested path.                                                                                                                                                             |       Array of String       |
-| `path.current`   | An array of strings that joined represents the path currently being processed.                                                                                                                                                              |       Array of String       |
-| `path.remaining` | An array of strings that joined represents the path that is above the currently processed path.                                                                                                                                             |                             |
-| `query`          | An object holding the URL query parameters as an object ([keys has been converted to camel case](#query-parameters)).                                                                                                                       |           Object            |
-| `state`          | A string indicating the current state of the request – possible values are `'routing'`, `'rendering'`, `'completed'` or `'aborted'`.                                                                                                        |           String            |
+| Name             | Description                                                  |            Type             |
+| ---------------- | ------------------------------------------------------------ | :-------------------------: |
+| `application`    | The application instance that has received the request.      | [Application](#Application) |
+| `request`        | The request object from the HTTP server.                     |     [Request](#Request)     |
+| `response`       | The response object from the HTTP server.                    |    [Response](#Response)    |
+| `parameters`     | An empty object that will contain the parameters picked up when processing the parameters (if any) of the requested path. |           Object            |
+| `path`           | An object that has properties representing different paths.  |           Object            |
+| `path.full`      | An array of strings that joined represent the path of the fully requested path. |       Array of String       |
+| `path.current`   | An array of strings that joined represents the path currently being processed. |       Array of String       |
+| `path.remaining` | An array of strings that joined represents the path that is above the currently processed path. Setting this will rewrite the remaining path. |       Array of String       |
+| `query`          | An object holding the URL query parameters as an object ([keys has been converted to camel case](#query-parameters)). |           Object            |
+| `state`          | A string indicating the current state of the request – possible values are `'routing'`, `'rendering'`, `'completed'` or `'aborted'`. |           String            |
 | `abort`          | A function that aborts the request. It takes the parameters `(error, brutally)`, where `error` is the error that needs to be handled by the [renderer](#renderer) – and `brutally` which indicates if the connection should also be closed. |        AsyncFunction        |
-| `render`         | A function that tells the application to stop processing the request and jump directly to the [renderer](#renderer).                                                                                                                        |          Function           |
-| `result`         | Whatever has been returned by the method handlers (should be written to the response in the [`renderer`](#renderer)).                                                                                                                       |             Any             |
+| `render`         | A function that tells the application to stop processing the request and jump directly to the [renderer](#renderer). |          Function           |
+| `result`         | Whatever has been returned by the method handlers (should be written to the response in the [`renderer`](#renderer)). |             Any             |
 
 ##### Example
 
@@ -495,15 +495,17 @@ This method takes care of handing a specified HTTP method.
 
 Supported HTTP methods are the same as those returned by [`http.METHODS`](https://nodejs.org/dist/latest/docs/api/http.html#httpmethods).
 
-No more routes will be processed, when one of these handlers return. The returned value is send to the [renderer](#renderer).
+You can only call these methods once per method per endpoint – calling it multiple times will result in only the last one getting used.
 
 > Returns the endpoint.
 
 ###### Parameters
 
-| Name       | Description                  |                           Type                           |      Required      | Default value |
-| ---------- | ---------------------------- | :------------------------------------------------------: | :----------------: | :-----------: |
-| `handlers` | A (or an array of) handlers. | Function, AsyncFunction or Array ([see also](#handlers)) | :white_check_mark: |               |
+| Name       | Description                    |                           Type                           |      Required      | Default value |
+| ---------- | ------------------------------ | :------------------------------------------------------: | :----------------: | :-----------: |
+| `handlers` | A (or an array of) handlers. * | Function, AsyncFunction or Array ([see also](#handlers)) | :white_check_mark: |               |
+
+> \* When more than one handler are provided all but the last are treated as `.use` handlers (but specific to the HTTP method). Only the return value of the last handler is sent to the renderer.
 
 ###### Example
 

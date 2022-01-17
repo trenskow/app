@@ -74,6 +74,19 @@ describe('Application', () => {
 
 		});
 
+		it ('should respond with 200 and no content when a GET method is configured and HEAD is requested.', async () => {
+
+			app.root(
+				new Endpoint()
+					.get(() => 'Hello, World!')
+			);
+
+			await request
+				.head('/')
+				.expect(200, undefined);
+
+		});
+
 		it ('should ignore multiple GET method handlers and respond with 200 and `Hello, World!`.', async () => {
 
 			app.root(

@@ -497,6 +497,8 @@ Supported HTTP methods are the same as those returned by [`http.METHODS`](https:
 
 You can only call these methods once per method per endpoint – calling it multiple times will result in only the last one getting used.
 
+These also ends routing. After a method route has been called, the routing will go strait to the renderer.
+
 > Returns the endpoint.
 
 ###### Parameters
@@ -505,7 +507,7 @@ You can only call these methods once per method per endpoint – calling it mult
 | ---------- | ------------------------------ | :------------------------------------------------------: | :----------------: | :-----------: |
 | `handlers` | A (or an array of) handlers. * | Function, AsyncFunction or Array ([see also](#handlers)) | :white_check_mark: |               |
 
-> \* When more than one handler are provided all but the last are treated as `.use` handlers (but specific to the HTTP method). Only the return value of the last handler is sent to the renderer.
+> \* When more than one handler is provided only the return value of the last handler that returned a non-undefined value will be send the the renderer.
 
 ###### Example
 

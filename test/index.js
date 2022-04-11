@@ -93,7 +93,9 @@ describe('Application', () => {
 				new Endpoint()
 					.get(() => 'Ignore this!')
 					.post(() => 'Not used')
-					.get(() => 'Hello, World!')
+					.get(
+						() => 'Hello, World!',
+						() => { /* Ignore this */ })
 			);
 
 			await request

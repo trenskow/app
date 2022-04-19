@@ -74,7 +74,24 @@ describe('Application', () => {
 
 		});
 
-		it ('should respond with 200 and no content when a GET method is configured and HEAD is requested.', async () => {
+		it ('should respond with 200 when HEAD method is configured and HEAD method is requested', async () => {
+
+			app.root(
+				new Endpoint()
+					.get(() => 'Hello, World!')
+					.head(({ response }) => {
+						response.statusCode = 204;
+						return 'Hello, World!';
+					})
+			);
+
+			await request
+				.head('/')
+				.expect(204, undefined);
+
+		});
+
+		it ('should respond with 200 and no content when a GET method is configured (but no HEAD method) and HEAD is requested.', async () => {
 
 			app.root(
 				new Endpoint()

@@ -499,6 +499,8 @@ You can only call these methods once per method per endpoint – calling it mult
 
 These also ends routing. After a method route has been called, the routing will go strait to the renderer.
 
+> Notice: If no `head` method is implemented on endpoint, `get` will instead be called (if availble). When client requests a `head` the result will be ignored.
+
 > Returns the endpoint.
 
 ###### Parameters

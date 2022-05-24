@@ -216,7 +216,7 @@ Endpoints has the [`mount`](#mount) method, which "mounts" a router to the speci
 
 There is a variant of the `mount` method called [`parameter`](#parameter) which is used to mount an endpoint with a dynamic path – whereas the path is treated like an input parameter (like express' `.param` method). Parameters also supports a transform function, which is able to transform the parameter into something else (eg. a user identifier into a user object).
 
-Lastly there is the [`.middleware`](#middleware) method, which is used to attach middleware. Middleware is defined as a router, which is of the type [`Router`](#router-2) and therefore cannot act as an endpoint. You can regard them like transforms or service providers for the request.
+Lastly there is the [`.middleware`](#middleware) method, which is used to attach middleware. Middleware is defined as a router, which have the type [`Router`](#router-2) and therefore cannot act as an endpoint. You can regard them like transforms or service providers for the request.
 
 > `Endpoint` extends `Router`.
 
@@ -228,9 +228,9 @@ All handlers and routers support async functions (and non-async). No need to cal
 
 Where express gives you the `(req, res, next)` parameters for each handler, this application instead just provides a single parameter, the "`context` object", which contains all the information needed to process the request.
 
-Middleware can also use the context to provide data and services, which is then available for subsequent endpoints, routers and handlers.
+Middleware can assign values to the context to provide data and services, which is then available for subsequent endpoints, routers and handlers.
 
-When a request is incoming, the `context`object looks like this.
+When a request is incoming, the `context` object looks like this.
 
 | Name             | Description                                                  |            Type             |
 | ---------------- | ------------------------------------------------------------ | :-------------------------: |
@@ -241,7 +241,7 @@ When a request is incoming, the `context`object looks like this.
 | `path`           | An object that has properties representing different paths.  |           Object            |
 | `path.full`      | An array of strings that joined represent the path of the fully requested path. |       Array of String       |
 | `path.current`   | An array of strings that joined represents the path currently being processed. |       Array of String       |
-| `path.remaining` | An array of strings that joined represents the path that is above the currently processed path. Setting this will rewrite the remaining path. |       Array of String       |
+| `path.remaining` | An array of strings that joined represents the path that is above the currently processed path. Setting this will rewrite the remaining path (useful when serving single page applications to a browser). |       Array of String       |
 | `query`          | An object holding the URL query parameters as an object ([keys has been converted to camel case](#query-parameters)). |           Object            |
 | `state`          | A string indicating the current state of the request – possible values are `'routing'`, `'rendering'`, `'completed'` or `'aborted'`. |           String            |
 | `abort`          | A function that aborts the request. It takes the parameters `(error, brutally)`, where `error` is the error that needs to be handled by the [renderer](#renderer) – and `brutally` which indicates if the connection should also be closed. |        AsyncFunction        |
@@ -267,15 +267,15 @@ JavaScript is a camel cased language. HTTP is a mixture of different case types.
 
 Case is automatically converted in both directions, so if you do `context.response.headers.contentType = 'application/json'` it will automatically be converted to `Content-Type: application/json` when the response is sent.
 
-The same goes for request headers like `Accept-Language: en` that is accessible through `context.request.headers.acceptLanguage`. 
+The same goes for request headers like `Accept-Language: en` which is accessible through `context.request.headers.acceptLanguage`. 
 
 ##### Query parameters
 
-Request with `?my-parameter=value` is accessible through `context.query.myParameter` .
+Request with quuries like `?my-parameter=value` is accessible through `context.query.myParameter` .
 
 ##### Mount paths
 
-When [match mode](#constructor) is set to `'loosely'` (default) a request withe the path component `my-route` or `my_route` will match an endpoint mounted at `myRoute`.
+When [match mode](#constructor) is set to `'loosely'` (default) a request with the path component `my-route` or `my_route` will match an endpoint mounted at `myRoute`.
 
 #### Endpoints, routers and handlers
 
@@ -287,22 +287,13 @@ Endpoints takes care of a path component. As example the `/this/is/my/path/` pat
 
 Endpoints can have a couple of things mounted / attached to it – those are.
 
-* Other endpoints
-	* using the [`.mount`](#mount) method of [`Endpoint`](#endpoint-2).
-
-* Parameters
+* Other endpoints (using the [`.mount`](#mount) method of [`Endpoint`](#endpoint-2))
+* Parameters (using the [`.parameter`](#parameter) method of [`Endpoint`](#endpoint-2))
 	* which is also a mounted endpoint – but where the path is dynamic and assigned to the `context.parameters` object.
-	* using the [`.parameter`](#parameter) method of [`Endpoint`](#endpoint-2)
-
-* Handlers
-	* using the [`.use`](#use) method of [`Router`](#router-2) or [`Endpoint`](#endpoint-2) 
-
-* Middleware
+* Handlers (using the [`.use`](#use) method of [`Router`](#router-2) or [`Endpoint`](#endpoint-2) )
+* Middleware (using the [`.middleware`](#middleware) method of  [`Endpoint`](#endpoint-2) )
 	* sets a [`Router`](#routers-2) router to that the request will be passed through.
-	* using the [`.middleware`](#middleware) method of  [`Endpoint`](#endpoint-2) 
-
-* Methods
-	* using the [`.get`, `.post`, `.put`, `.delete`, etc.](#get-post-put-delete-etc) method of [`Endpoint`](#endpoint-2)
+* Methods (using the [`.get`, `.post`, `.put`, `.delete`, etc.](#get-post-put-delete-etc) method of [`Endpoint`](#endpoint-2))
 	* When a method returns the request ends and the returned value is send to the client as a response (through the [`Application#renderer`](#renderer))
 
 
@@ -311,7 +302,7 @@ Endpoints can have a couple of things mounted / attached to it – those are.
 Whenever a function (such as [`.mount`](#mount) or [`.parameter`](#parameters) or [`.root`](#root)) takes an endpoint as a parameter, it can be provided in any of the following ways.
 
 * An instance of [`Endpoint`](#endpoint-2).
-* An object that has a `default` key that has an instance of `Endpoint` as the value (useful when using inline imports).
+* An object that has a `default` key that has an instance of `Endpoint` as the value (useful when using inline imports as `await import('my-endpoint.js')`).
 
 ##### Routers
 
@@ -322,7 +313,7 @@ A router is the same as above, except it only supports [`.use`](#use).
 As above, whenever a function takes a router as a parameter, it can be provided in any of the following ways.
 
 * An instance of [`Router`](#router-2).
-* An object that has a `default` key that has an instance of `Router` as the value (useful when using inline imports).
+* An object that has a `default` key that has an instance of `Router` as the value (useful when using inline imports as `await import('my-route.js')`).).
 
 ##### Handlers
 
@@ -340,7 +331,7 @@ Whenever a function takes a handler as a parameter, it can be provided in any of
 
 ### `Application`
 
-The `Application` class holds an application and is responsible for handling and bootstrapping request from the server. It does not provide any routing on it's own, instead it has a [`root`](#root) method, which is used to set the root router.
+The `Application` class holds an application and is responsible for handling and bootstrapping request from the server. It does not provide any routing on its own, instead it has a [`root`](#root) method, which is used to set the root router.
 
 > If no root route has been set, all requests will be responded with `404 Not Found`.
 
@@ -352,17 +343,17 @@ The `Application` class takes an "options" object as it's parameter.
 
 ##### Parameters
 
-| Name                     | Description                                                                                                                                       |           Type            | Required |        Default value         |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- | :-----------------------: | :------: | :--------------------------: |
-| options                  | An object representing the options.                                                                                                               |          Object           |          |              {}              |
-| `options.port`           | The port at which to listen for incoming connections.                                                                                             |          Number           |          | `0` (automatically assigned) |
+| Name                     | Description                                                  |           Type            | Required |        Default value         |
+| ------------------------ | ------------------------------------------------------------ | :-----------------------: | :------: | :--------------------------: |
+| options                  | An object representing the options.                          |          Object           |          |              {}              |
+| `options.port`           | The port at which to listen for incoming connections.        |          Number           |          | `0` (automatically assigned) |
 | `options.RequestType`    | An object that inherits from the [`Request`](#request-2) class (an `http.IncomingMessage` subclass) that is used as the request object in routes. |           class           |          |    [`Request`](#Request)     |
-| `options.ResponseType`   | An object that inherits from the [`Response`](#response-2) class (`http.ServerResponse` subclass) that is used as the response object in routes.  |           class           |          |   [`Response`](#Response)    |
-| `path`                   | An object that represents path related options.                                                                                                   |          Object           |          |             `{}`             |
-| `path.matchMode`         | Indicates [how to match requests to mounted paths](#mount-paths).                                                                                 | `'loosely'` or `'strict'` |          |         `'loosely'`          |
-| `options.server`         | An object that represents how to instantiate the HTTP server.                                                                                     |          Object           |          |             `{}`             |
-| `options.server.create`  | A function that is able to create a server.                                                                                                       |         Function          |          |     `http.createServer`      |
-| `options.server.options` | An object to be passed as options when creating a server.                                                                                         |          Object           |          |             `{}`             |
+| `options.ResponseType`   | An object that inherits from the [`Response`](#response-2) class (`http.ServerResponse` subclass) that is used as the response object in routes. |           class           |          |   [`Response`](#Response)    |
+| `path`                   | An object that represents path related options.              |          Object           |          |             `{}`             |
+| `path.matchMode`         | Indicates [how to match requests to mounted paths](#mount-paths) (eg. should the path be converted to camel case). | `'loosely'` or `'strict'` |          |         `'loosely'`          |
+| `options.server`         | An object that represents how to instantiate the HTTP server. |          Object           |          |             `{}`             |
+| `options.server.create`  | A function that is able to create a server.                  |         Function          |          |     `http.createServer`      |
+| `options.server.options` | An object to be passed as options when creating a server.    |          Object           |          |             `{}`             |
 
 #### Events
 
@@ -499,7 +490,7 @@ You can only call these methods once per method per endpoint – calling it mult
 
 These also ends routing. After a method route has been called, the routing will go strait to the renderer.
 
-> Notice: If no `head` method is implemented on endpoint, `get` will instead be called (if availble). When client requests a `head` the result will be ignored.
+> Notice: If no `head` method is implemented on endpoint, `get` will instead be called (if ). When client requests a `head` the result will be ignored.
 
 > Returns the endpoint.
 
@@ -518,11 +509,13 @@ Below is an example on how to use the method.
 ````javascript
 default export ({ endpoint }) => {  
 	endpoint
-		.get(async (context) => 'Hello, world!');
+		.get(
+            async (context) => 'Hello, world!',
+            () => console.info("Said hello."));
 };
 ````
 
-> In the above example `'Hello, world!'` is immediately send to the [renderer](#renderer) and the request ends.
+> In the above example `'Hello, world!'` is immediately send to the [renderer](#renderer) and the request ends. The second handler is also executed, but as it returns `undefined` its return value is ignored.
 
 ###### Catch all
 

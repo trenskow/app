@@ -124,24 +124,24 @@ import { Application, Endpoint } from '@trenskow/app';
 const app = new Application({ port: 8080 });
 
 try {
-  
-  const root = new Endpoint()
-  	.mount('iam', await import('./iam.js'));
-  
-  const renderer = async ({ result, response }) => {
+
+	const root = new Endpoint()
+		.mount('iam', await import('./iam.js'));
+
+	const renderer = async ({ result, response }) => {
 			response.headers.contentType = 'text/plain';
 			response.end(result);
-  };
-  
+	};
+
 	await app
 		.root(root)
 		.renderer(renderer)
 		.start();
-  
-  console.info(`Application is running on port ${app.port}`)
-  
+
+	console.info(`Application is running on port ${app.port}`)
+
 } catch (error) {
-  console.error(error);
+	console.error(error);
 }
 ````
 
@@ -515,8 +515,8 @@ Below is an example on how to use the method.
 default export ({ endpoint }) => {  
 	endpoint
 		.get(
-            async (context) => 'Hello, world!',
-            () => console.info("Said hello."));
+			async (context) => 'Hello, world!',
+			() => console.info("Said hello."));
 };
 ````
 

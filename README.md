@@ -123,21 +123,26 @@ import { Application, Endpoint } from '@trenskow/app';
 
 const app = new Application({ port: 8080 });
 
-(async () => {
-
-	return (await app
-		.root(
-			new Endpoint()
-				.mount('iam', await import('./iam.js')))
-		.renderer(async ({ result, response }) => {
+try {
+  
+  const root = new Endpoint()
+  	.mount('iam', await import('./iam.js'));
+  
+  const renderer = async ({ result, response }) => {
 			response.headers.contentType = 'text/plain';
 			response.end(result);
-		})
-		.start())
-		.port;
-
-})().then((port) => console.info(`Application is running on port ${app.port}`))
-	.catch(console.error);
+  };
+  
+	await app
+		.root(root)
+		.renderer(renderer)
+		.start();
+  
+  console.info(`Application is running on port ${app.port}`)
+  
+} catch (error) {
+  console.error(error);
+}
 ````
 
 ````javascript

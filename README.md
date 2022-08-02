@@ -136,7 +136,7 @@ try {
 	await app
 		.root(root)
 		.renderer(renderer)
-		.start();
+		.open();
 
 	console.info(`Application is running on port ${app.port}`)
 

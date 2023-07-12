@@ -717,9 +717,9 @@ Typically used by middleware.
 
 ###### Parameters
 
-| Name      | Description                  |                           Type                           |      Required      | Default value |
-| --------- | ---------------------------- | :------------------------------------------------------: | :----------------: | :-----------: |
-| `handler` | A (or an array of) handlers. | Function, AsyncFunction or Array ([see also](#handlers)) | :white_check_mark: |               |
+| Name      | Description               |                           Type                           |      Required      | Default value |
+| --------- | ------------------------- | :------------------------------------------------------: | :----------------: | :-----------: |
+| `handler` | A (or multiple) handlers. | Function, AsyncFunction or Array ([see also](#handlers)) | :white_check_mark: |               |
 
 ###### Example
 
@@ -760,6 +760,34 @@ export default new Router()
 		/* Your handler here */
 	});
 ````
+
+##### `transform`
+
+This method hooks into the response chain and allows to change the result of the request. It will transform any value from below the routing tree from which it is added.
+
+###### Parameterts
+
+| Name        | Description                 |           Type            |      Required      | Default value |
+| ----------- | --------------------------- | :-----------------------: | :----------------: | :-----------: |
+| `transform` | A (or multiple) transforms. | [`function`](#endpoint-2) | :white_check_mark: |               |
+
+###### Example
+
+Below is an example of how to use a transform.
+
+````javascript
+import { Endpoint } from '@trenskow/app';
+
+export default new Endpoint()
+	.transform(async ({ result, context }) => {
+  	return (await result()) + ', World!';
+	})
+	.get(() => {
+  	return 'Hello';
+	});
+````
+
+> When endpoint is called using HTTP GET, it will return `'Hello, World!'`.
 
 ### `Request`
 

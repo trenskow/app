@@ -1,10 +1,10 @@
 //
 // index.js
 // @trenskow/app
-// 
+//
 // Created by Kristian Trenskow on 2021/11/08
 // For license see LICENSE.
-// 
+//
 
 import supertest from 'supertest';
 import { Endpoint, Router } from '../lib/index.js';
@@ -374,6 +374,23 @@ describe('Application', () => {
 						new Endpoint()
 							.get(() => 'Hello, World!')
 					)
+			);
+
+			await request
+				.get('/')
+				.expect('Content-Type', 'text/plain; charset=utf-8')
+				.expect(200, 'Hello, World!');
+
+		});
+
+		it ('should come back with value transformed in a transform.', async () => {
+
+			app.root(
+				new Endpoint()
+					.transform(async ({ result }) => {
+						return (await result()) + ', World!';
+					})
+					.get(() => 'Hello')
 			);
 
 			await request

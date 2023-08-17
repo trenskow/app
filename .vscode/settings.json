@@ -10,5 +10,9 @@
         "removeheader",
         "setheader",
         "writehead"
-    ]
+    ],
+    "[javascript]": {
+        "editor.formatOnSave": true,
+        "editor.formatOnPaste": true
+    }
 }

@@ -25,12 +25,12 @@
   },
   "homepage": "https://github.com/trenskow/app#readme",
   "devDependencies": {
-    "eslint": "^8.51.0",
+    "eslint": "^8.52.0",
     "mocha": "^10.2.0",
     "supertest": "^6.3.3"
   },
   "dependencies": {
-    "@trenskow/api-error": "^2.3.13",
+    "@trenskow/api-error": "^2.4.0",
     "@trenskow/caseit": "^1.3.9"
   }
 }

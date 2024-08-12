@@ -25,9 +25,9 @@
   },
   "homepage": "https://github.com/trenskow/app#readme",
   "devDependencies": {
-    "eslint": "^8.57.0",
+    "eslint": "^9.9.0",
     "mocha": "^10.3.0",
-    "supertest": "^6.3.4"
+    "supertest": "^7.0.0"
   },
   "dependencies": {
     "@trenskow/api-error": "^2.4.9",

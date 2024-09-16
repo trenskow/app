@@ -31,6 +31,6 @@
   },
   "dependencies": {
     "@trenskow/api-error": "^2.4.13",
-    "@trenskow/caseit": "^1.3.13"
+    "@trenskow/caseit": "^1.3.14"
   }
 }

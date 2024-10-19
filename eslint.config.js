@@ -19,7 +19,7 @@ export default [...compat.extends('eslint:recommended'), {
 			...globals.mocha,
 		},
 
-		ecmaVersion: 2022,
+		ecmaVersion: 'latest',
 		sourceType: 'module',
 	},
 

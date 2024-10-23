@@ -33,7 +33,7 @@
 		"supertest": "^7.0.0"
 	},
 	"dependencies": {
-		"@trenskow/api-error": "^2.5.11",
+		"@trenskow/api-error": "^2.5.12",
 		"@trenskow/caseit": "^1.4.4"
 	}
 }

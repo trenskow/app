@@ -29,7 +29,7 @@
 		"@eslint/js": "^9.13.0",
 		"eslint": "^9.16.0",
 		"globals": "^15.13.0",
-		"mocha": "^10.8.2",
+		"mocha": "^11.0.1",
 		"supertest": "^7.0.0"
 	},
 	"dependencies": {

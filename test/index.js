@@ -50,9 +50,7 @@ describe('Application', () => {
 		it ('should respond with 405 when a route is configured, but request method is not specified,', async () => {
 			app.root(
 				new Endpoint()
-					.post(() => {})
-					.put(() => {})
-					.delete(() => {})
+					.post.put.delete(() => {})
 			);
 			await request
 				.get('/')
@@ -109,7 +107,7 @@ describe('Application', () => {
 				new Endpoint()
 					.get(() => 'Hello, World!')
 					.get(() => 'Hello, World! (2)');
-			}).to.throw('Endpoint already has a `get` handler.');
+			}).to.throw('Endpoint already has a handler.');
 		});
 
 		it ('should ignore GET method handler when path has been rewritten and respond with 200 and `Hello, World!`.', async () => {
@@ -283,7 +281,7 @@ describe('Application', () => {
 
 		});
 
-		it ('should respond with a value when using PUT on a catch-all method.', async () => {
+		it ('should respond with a value when using PUT on a all handler.', async () => {
 
 			app.root(
 				new Endpoint()

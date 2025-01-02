@@ -313,6 +313,8 @@ Whenever a function (such as [`.mount`](#mount) or [`.parameter`](#parameters) o
 
 A router is the same as above, except it only supports [`.use`](#use).
 
+> `.use` also has method specific variants such as `use.get`, `use.post`, `use.put`, `use.delete`, etc...
+
 ###### When using routers
 
 As above, whenever a function takes a router as a parameter, it can be provided in any of the following ways.
@@ -707,7 +709,7 @@ The constructor takes no parameters.
 
 #### Instance methods
 
-##### `use`
+##### `use`, `use.get`, `use.post`, `use.put`, `use.delete`, etc...
 
 This method is like the [HTTP method handlers](#get-post-put-delete-etc) of [`Endpoint`](#endpoint-2), except it is called with all HTTP methods and the return value is ignored. Routing continues after handler returns.
 

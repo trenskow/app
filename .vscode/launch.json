@@ -15,7 +15,9 @@
 			"args": [
 				"${workspaceFolder}/test/index.js",
 				"--timeout",
-				"0"
+				"0",
+				"--skip",
+				"20"
 			]
 		}
 	]

@@ -7,13 +7,13 @@
 //
 
 import supertest from 'supertest';
-import { Endpoint, Router } from '../lib/index.js';
+import { expect } from 'chai';
 
-import Application from '../lib/index.js';
+import { Application, Endpoint, Router } from '../lib/index.js';
 
 process.on('unhandledRejection', (error) => {
 	console.error(error.stack);
-	process.exit (1);
+	process.eit (1);
 });
 
 let app;
@@ -104,22 +104,12 @@ describe('Application', () => {
 
 		});
 
-		it ('should ignore multiple GET method handlers and respond with 200 and `Hello, World!`.', async () => {
-
-			app.root(
+		it ('should throw an error if endpoint already has a handler for method.', async () => {
+			expect(() => {
 				new Endpoint()
-					.get(() => 'Ignore this!')
-					.post(() => 'Not used')
-					.get(
-						() => 'Hello, World!',
-						() => { /* Ignore this */ })
-			);
-
-			await request
-				.get('/')
-				.expect('Content-Type', 'text/plain; charset=utf-8')
-				.expect(200, 'Hello, World!');
-
+					.get(() => 'Hello, World!')
+					.get(() => 'Hello, World! (2)');
+			}).to.throw('Endpoint already has a `get` handler.');
 		});
 
 		it ('should ignore GET method handler when path has been rewritten and respond with 200 and `Hello, World!`.', async () => {
@@ -244,7 +234,7 @@ describe('Application', () => {
 
 		});
 
-		it ('should respond with a something generated in a transform.', async () => {
+		it ('should respond with a value generated in a transform.', async () => {
 
 			app.root(
 				new Endpoint()
@@ -258,6 +248,38 @@ describe('Application', () => {
 				.get('/')
 				.expect('Content-Type', 'text/plain; charset=utf-8')
 				.expect(200, 'my-value');
+
+		});
+
+		it ('should respond with an ignored value generated in a specific transform.', async () => {
+
+			app.root(
+				new Endpoint()
+					.use(({ parameters }) => parameters.value = 'my-value')
+					.use.post(({ parameters }) => parameters.value = 'my-value-post')
+					.get(({ parameters: { value }}) => value)
+			);
+
+			await request
+				.get('/')
+				.expect('Content-Type', 'text/plain; charset=utf-8')
+				.expect(200, 'my-value');
+
+		});
+
+		it ('should respond with a value generated in a specific transform.', async () => {
+
+			app.root(
+				new Endpoint()
+					.use(({ parameters }) => parameters.value = 'my-value')
+					.use.get(({ parameters }) => parameters.value = 'my-value-get')
+					.get(({ parameters: { value }}) => value)
+			);
+
+			await request
+				.get('/')
+				.expect('Content-Type', 'text/plain; charset=utf-8')
+				.expect(200, 'my-value-get');
 
 		});
 

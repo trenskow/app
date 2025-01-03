@@ -195,6 +195,25 @@ describe('Application', () => {
 
 		});
 
+		it ('should respond with 404 when endpoint has no methods.', async () => {
+
+			app.root(
+				new Endpoint()
+					.mounts.hello(
+						new Endpoint()
+							.mounts.world(
+								new Endpoint()
+									.get(() => 'Hello, World!')
+							)
+					)
+			);
+
+			await request
+				.get('/hello')
+				.expect(404);
+
+		});
+
 		it ('should respond with parameter value.', async () => {
 
 			app.root(

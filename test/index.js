@@ -439,6 +439,83 @@ describe('Application', () => {
 
 		});
 
+		it ('should come back with header to set cookie.', async () => {
+
+			app.root(
+				new Endpoint()
+					.get(({ cookies }) => {
+						cookies['testValue'] = 'Hello, World!';
+						return 'Hello, World!';
+					})
+			);
+
+			await request
+				.get('/')
+				.expect('Set-Cookie', 'testValue=Hello%2C%20World!; Path=/; Domain=::1; Secure')
+				.expect(200, 'Hello, World!');
+
+		});
+
+		it ('should come back with an updated header to set cookie.', async () => {
+
+			app.root(
+				new Endpoint()
+					.get(({ cookies }) => {
+						cookies['testValue'] = {
+							value: 'Hello, World!',
+							path: '/test',
+							expires: '30d'
+						};
+						return 'Hello, World!';
+					})
+			);
+
+			await request
+				.get('/')
+				.set('Cookie', 'testValue=Hello')
+				.expect('Set-Cookie', 'testValue=Hello%2C%20World!; Max-Age=2592000; Path=/test; Domain=::1; Secure')
+				.expect(200, 'Hello, World!');
+
+		});
+
+		it ('should come back with an updated header to a deleted cookie.', async () => {
+
+			app.root(
+				new Endpoint()
+					.get(({ cookies }) => {
+						delete cookies['testValue'];
+						return 'Hello, World!';
+					})
+			);
+
+			await request
+				.get('/')
+				.set('Cookie', 'testValue=Hello')
+				.expect('Set-Cookie', 'testValue=; Max-Age=0')
+				.expect(200, 'Hello, World!');
+
+		});
+
+		it ('should come back with no new cookies if no cookies are set.', (done) => {
+
+			app.root(
+				new Endpoint()
+					.get(() => 'Hello, World!')
+			);
+
+			request
+				.get('/')
+				.expect(200, 'Hello, World!')
+				.end((error, response) => {
+					if (error) return done(error);
+					if (response.headers['set-cookie']) {
+						return done(new Error('Response should not have set-cookie header.'));
+					}
+					done();
+				});
+
+		});
+
 		after(async () => {
 			await app.close({ awaitAllConnections: true });
 		});

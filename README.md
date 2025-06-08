@@ -248,7 +248,6 @@ When a request is incoming, the `context` object looks like this.
 | `path.current`   | An array of strings that joined represents the path currently being processed. |       Array of String       |
 | `path.remaining` | An array of strings that joined represents the path that is above the currently processed path. Setting this will rewrite the remaining path (useful when serving single page applications to a browser). |       Array of String       |
 | `query`          | An object holding the URL query parameters as an object ([keys has been converted to camel case](#query-parameters)). |           Object            |
-| `cookies`        | An mutable object with cookie values.                        |           Object            |
 | `state`          | A string indicating the current state of the request – possible values are `'routing'`, `'rendering'`, `'completed'` or `'aborted'`. |           String            |
 | `abort`          | A function that aborts the request. It takes the parameters `(error, brutally)`, where `error` is the error that needs to be handled by the [renderer](#renderer) – and `brutally` which indicates if the connection should also be closed. |        AsyncFunction        |
 | `render`         | A function that tells the application to stop processing the request and jump directly to the [renderer](#renderer). |          Function           |
@@ -277,11 +276,7 @@ The same goes for request headers like `Accept-Language: en` which is accessible
 
 ##### Query parameters
 
-Request with queries like `?my-parameter=value` is accessible through `context.query.myParameter` .
-
-##### Cookies
-
-Cookies are available through `context.cookies.myCookieKey` and are passed to the client using `camel` (can be changed using the [`Application` options](#constructor)).
+Request with quuries like `?my-parameter=value` is accessible through `context.query.myParameter` .
 
 ##### Mount paths
 
@@ -361,13 +356,11 @@ The `Application` class takes an "options" object as it's parameter.
 | `options.port`           | The port at which to listen for incoming connections.        |          Number           |          | `0` (automatically assigned) |
 | `options.RequestType`    | An object that inherits from the [`Request`](#request-2) class (an `http.IncomingMessage` subclass) that is used as the request object in routes. |           class           |          |    [`Request`](#Request)     |
 | `options.ResponseType`   | An object that inherits from the [`Response`](#response-2) class (`http.ServerResponse` subclass) that is used as the response object in routes. |           class           |          |   [`Response`](#Response)    |
-| `options.path`           | An object that represents path related options.              |          Object           |          |             `{}`             |
-| `options.path.matchMode` | Indicates [how to match requests to mounted paths](#mount-paths) (eg. should the path be converted to camel case). | `'loosely'` or `'strict'` |          |         `'loosely'`          |
+| `path`                   | An object that represents path related options.              |          Object           |          |             `{}`             |
+| `path.matchMode`         | Indicates [how to match requests to mounted paths](#mount-paths) (eg. should the path be converted to camel case). | `'loosely'` or `'strict'` |          |         `'loosely'`          |
 | `options.server`         | An object that represents how to instantiate the HTTP server. |          Object           |          |             `{}`             |
 | `options.server.create`  | A function that is able to create a server.                  |         Function          |          |     `http.createServer`      |
 | `options.server.options` | An object to be passed as options when creating a server.    |          Object           |          |             `{}`             |
-| `options.casing`         | An object that represents casing options.                    |          Object           |          |              {}              |
-| `options.casing.cookies` | Client side cookie key value casing (available as in [@trenskow/caseit](https://github.com/trenskow/caseit)). |          String           |          |           `camel`            |
 
 #### Events
 

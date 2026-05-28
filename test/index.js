@@ -439,6 +439,27 @@ describe('Application', () => {
 
 		});
 
+		it ('should come back with `Vary` header set.', async () => {
+
+			app.root(
+				new Endpoint()
+					.use(({ response }) => {
+						response.vary('contentLanguage');
+					})
+					.use(({ response }) => {
+						response.headers.contentLanguage = 'en';
+					})
+					.get(() => 'Hello, World!')
+			);
+
+			await request
+				.get('/')
+				.expect('Content-Language', 'en')
+				.expect('Vary', 'Content-Language')
+				.expect(200, 'Hello, World!');
+
+		});
+
 		after(async () => {
 			await app.close({ awaitAllConnections: true });
 		});

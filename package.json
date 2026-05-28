@@ -36,6 +36,6 @@
 	"dependencies": {
 		"@trenskow/api-error": "^2.5.64",
 		"@trenskow/caseit": "^1.4.24",
-		"@trenskow/units": "^0.2.54"
+		"@trenskow/units": "^0.2.55"
 	}
 }

@@ -28,13 +28,13 @@
 		"@eslint/eslintrc": "^3.3.5",
 		"@eslint/js": "^10.0.1",
 		"chai": "^6.2.2",
-		"eslint": "^10.5.0",
+		"eslint": "^10.6.0",
 		"globals": "^17.7.0",
 		"mocha": "^11.7.6",
 		"supertest": "^7.2.2"
 	},
 	"dependencies": {
-		"@trenskow/api-error": "^2.5.69",
+		"@trenskow/api-error": "^2.5.70",
 		"@trenskow/caseit": "^1.4.26",
 		"@trenskow/units": "^0.2.58"
 	}

@@ -25,16 +25,16 @@
 	},
 	"homepage": "https://github.com/trenskow/app#readme",
 	"devDependencies": {
-		"@eslint/eslintrc": "^3.3.5",
+		"@eslint/eslintrc": "^3.3.6",
 		"@eslint/js": "^10.0.1",
 		"chai": "^6.2.2",
-		"eslint": "^10.6.0",
+		"eslint": "^10.7.0",
 		"globals": "^17.7.0",
 		"mocha": "^11.7.6",
 		"supertest": "^7.2.2"
 	},
 	"dependencies": {
-		"@trenskow/api-error": "^2.5.71",
+		"@trenskow/api-error": "^2.5.72",
 		"@trenskow/caseit": "^1.4.27",
 		"@trenskow/units": "^0.2.59"
 	}

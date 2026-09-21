@@ -34,8 +34,8 @@
 		"supertest": "^7.2.2"
 	},
 	"dependencies": {
-		"@trenskow/api-error": "^2.5.85",
-		"@trenskow/caseit": "^1.4.32",
+		"@trenskow/api-error": "^2.5.86",
+		"@trenskow/caseit": "^1.4.33",
 		"@trenskow/units": "^0.2.68"
 	}
 }
